@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from dcim.models import *
 from django.contrib.auth.decorators import login_required
 
 
