@@ -1,16 +1,16 @@
-# CREATE A FOLDER CALLED PLUGINS IN ~/netbox-docker/
-# COPY THE CONTENTS HERE TO ~/netbox-docker/plugins/
-# CREATE DOCKERFILE-PLUGINS IN ~/netbox-docker/
+# Create a folder called plugins in: ~/netbox-docker/
+# Copy the contents here to: ~/netbox-docker/plugins/
+# Create Dockerfile-Plugins in: ~/netbox-docker/
 
 # DOCKERFILE-PLUGINS:
 
 FROM netboxcommunity/netbox:latest
 
-# repeat the last line for every plugin you want to load editable and customize the path
+// repeat the last line for every plugin you want to load editable and customize the path
 COPY ./plugins /plugins
 RUN /opt/netbox/venv/bin/pip install --editable /plugins/plug-in- #pip install --editable /plugins/plug-in-name on macs (????)
 
-# EDIT THE DOCKER-COMPOSE.TEST.OVERRIDE.YML FILE IN ~/netbox-docker/
+# Edit the docker-compose.test.override.yml file in: ~/netbox-docker/
 
 version: '3.4'
 services:
@@ -34,15 +34,15 @@ services:
       context: .
       dockerfile: Dockerfile-Plugins
 
-# EDIT CONFIGURATION.PY AT ~/NETBOX-DOCKER/CONFIGURATION/CONFIGURATION.PY
+# Edit configuration.py at: ~/netbox-docker/configuration/configuration.py
 
-# FIND PLUGINS[], UNCOMMENT IT AND ADD YOUR PLUGIN NAME I.E:
+# Find PLGUINS[], uncomment it and add your plugin name i.e.:
 PLUGINS[
     'netbox_plugin_name',
 ]
 
-# TO RUN BOTH DOCKER-COMPOSE FILES RUN THE FOLLOWING COMMANDS:
+# To run both docker-compose files run the following commands:
 
 docker compose -f docker-compose.yml -f docker-compose.test.override.yml up --build (-d if you want to send it to the background)
 
-# TO CHECK THE RESULT GO TO 127/0/0/1:8000/ADMIN/PLUGINS/ AND CHECK IF THE PLUGIN IS THERE
+# To check the result got to 127.0.0.1:8000/admin/plugins and check if the plguin is there
