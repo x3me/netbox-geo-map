@@ -8,7 +8,7 @@ FROM netboxcommunity/netbox:latest
 
 // repeat the last line for every plugin you want to load editable and customize the path
 COPY ./plugins /plugins
-RUN /opt/netbox/venv/bin/pip install --editable /plugins/plug-in- #pip install --editable /plugins/plug-in-name on macs (????)
+RUN /opt/netbox/venv/bin/pip install --editable /plugins/plug-in- OR#pip install --editable /plugins/plug-in-name on macs (????)
 
 # Edit the docker-compose.test.override.yml file in: ~/netbox-docker/
 
