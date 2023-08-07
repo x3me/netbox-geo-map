@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NetBox Google Maps Plugin Test</title>
+    <!-- Add your CSS and any other required meta tags here -->
+</head>
+<body>
+    <!-- Create a div to hold the Google Map -->
+    <div id="map" style="height: 600px; width: 100%;">
+    <h1> Netbox plugin</h1>
+    </div>
+    <!-- Load the Google Maps API -->
+   
+    <script
+      async
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1G9PA3Mb4FHHh_8qMJSaUlFQ751wrBF0&callback=initMap"
+    ></script>
+
+    <script src="{%static 'geo_map/index.js'%}"></script>
+</body>
+</html>
