@@ -2,5 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("geo-map/", views.google_map, name="google_map"),
+    path("", views.google_map, name="google_map"),
+    path("api/sites", views.get_sites, name="api_sites"),
 ]
