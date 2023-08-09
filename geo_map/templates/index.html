@@ -6,15 +6,26 @@
     <!-- Add your CSS and any other required meta tags here -->
 </head>
 <body>
+  <h1> Geo map</h1>
+  <label for="statusSelect">Filter by Site Status:</label>
+  <select id="statusSelect">
+    <option value="all">All</option>
+    <option value="active">Active</option>
+    <option value="planned">Planned</option>
+    <option value="provisioning">Provisioning</option>
+    <option value="offline">Offline</option>
+    <option value="deprovisioning">Deprovisioning</option>
+    <option value="decommissioning">Decommissioning</option>
+  </select>
     <!-- Create a div to hold the Google Map -->
     <div id="map" style="height: 600px; width: 100%;">
-    <h1> Netbox plugin</h1>
+    
     </div>
     <!-- Load the Google Maps API -->
    
     <script
       async
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1G9PA3Mb4FHHh_8qMJSaUlFQ751wrBF0&callback=initMap"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoCKdtdIV6CTP5tCHdcmH7GYlSTA4qLAk&callback=initMap"
     ></script>
 
     <script src="{%static 'geo_map/index.js'%}"></script>

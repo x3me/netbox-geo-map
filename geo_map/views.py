@@ -27,4 +27,5 @@ def get_sites(request):
                 "group": _site["group__name"],
             }
         )
+  
     return JsonResponse(site_info_list, safe=False)
