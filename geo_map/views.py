@@ -7,12 +7,14 @@ from django.http import JsonResponse
 @login_required
 def google_map(request):
     return render(request, "index.html")
+
 groups = {
     "Distribution": "distribution",
     "Access": "access",
     "Pit": "fiberpit",
     "Core": "core",
 }
+
 statuses = {
     "planned": "_planned",
     "staging": "_staging",
@@ -44,3 +46,22 @@ def get_sites(request):
         )
   
     return JsonResponse(site_info_list, safe=False)
+
+@login_required
+def get_circuits(request):
+    _circuits = Circuit.objects.filter(
+        termination_a__isnull=False, termination_z__isnull=False
+    ).select_related("termination_a__site", "termination_z__site")
+    coords = []
+    for _circuit in _circuits:
+        lat_a = _circuit.termination_a.site.latitude
+        lng_a = _circuit.termination_a.site.longitude
+        lat_z = _circuit.termination_z.site.latitude
+        lng_z = _circuit.termination_z.site.longitude
+        coords.append(
+            [
+                {"lat": float(lat_a), "lng": float(lng_a)},
+                {"lat": float(lat_z), "lng": float(lng_z)},
+            ]
+        )
+    return JsonResponse(coords, safe=False)
