@@ -25,7 +25,6 @@ function fetchDataAndCreateMap(status, group) {
   fetch('/plugins/geo_map/api/sites')
     .then(response => response.json())
     .then(data => {
-      console.log(data)
       const centerCoordinates = calculateCenter(data);
       const mapOptions = {
         center: centerCoordinates,
@@ -126,7 +125,7 @@ function addMarker(data) {
   const image = {
     url: data.icon,
     // This marker is 20 pixels wide by 32 pixels high.
-    // size: new google.maps.Size(16,12),
+    // size: new google.maps.Size(20,32),
     // The origin for this image is (0, 0).
     origin: new google.maps.Point(0, 0),
     // The anchor for this image is the base of the flagpole at (0, 32).
@@ -146,6 +145,25 @@ function addMarker(data) {
     }
     );
   }
+  //
+// new google.maps.Marker({
+//   position: { lat: 36.6163, lng: -100.61 },
+//   map,
+//   icon: {
+//     path: faBus.icon[4],
+//     fillColor: "#0000ff",
+//     fillOpacity: 1,
+//     anchor: new google.maps.Point(
+//       faBus.icon[0] / 2, // width
+//       faBus.icon[1], // height
+//     ),
+//     strokeWeight: 1,
+//     strokeColor: "#ffffff",
+//     scale: 0.075,
+//   },
+//   title: "FontAwesome SVG Marker",
+// });
+//
 }
 
 function calculateCenter(data) {

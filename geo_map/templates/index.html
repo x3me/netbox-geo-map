@@ -11,28 +11,39 @@
 </head>
 
 <body>
-  <h1> Geo map</h1>
-  <label for="statusSelect">Filter by Status:</label>
-  <select id="statusSelect">
-    <option value="all">All</option>
-    <option value="active">Active</option>
-    <option value="planned">Planned</option>
-    <option value="provisioning">Provisioning</option>
-    <option value="offline">Offline</option>
-    <option value="deprovisioning">Deprovisioning</option>
-    <option value="decommissioning">Decommissioning</option>
-  </select>
-  <br />
-  <label for="groupSelect">Filter by Group:</label>
-  <select id="groupSelect">
-    <option value="All">All</option>
-    <option value="Distribution">Distribution</option>
-    <option value="Access">Access</option>
-    <option value="Pit">Fiber Pit</option>
-    <option value="Core">Core</option>
-  </select>
+
+  <div style="display: flex; flex-direction: row;">
+    <h1> Geo map</h1>
+    <select id="statusSelect" style="margin: 7px; color: rgb(86, 86, 86);font-family: Roboto, Arial, sans-serif;font-size: 18px; background: white; border: none; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none; padding: 0px 20px 0px 20px;
+  ">
+      <option>Filter by Status</option>
+      <option value="all">All</option>
+      <option value="active">Active</option>
+      <option value="planned">Planned</option>
+      <option value="provisioning">Provisioning</option>
+      <option value="offline">Offline</option>
+      <option value="deprovisioning">Deprovisioning</option>
+      <option value="decommissioning">Decommissioning</option>
+    </select>
+    <!-- <label for="groupSelect">Filter by Group:</label> -->
+    <select id="groupSelect" style="margin: 7px; color: rgb(86, 86, 86);font-family: Roboto, Arial, sans-serif;font-size: 18px; background: white; border: none; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none; padding: 0px 20px 0px 20px;
+  ">
+      <option>Filter by Group</option>
+      <option value="All">All</option>
+      <option value="Distribution">Distribution</option>
+      <option value="Access">Access</option>
+      <option value="Pit">Fiber Pit</option>
+      <option value="Core">Core</option>
+    </select>
+  </div>
   <!-- Create a div to hold the Google Map -->
-  <div id="map" style="height: 600px; width: 100%;">
+  <div id="map" style="height: 600px; width: 100%; position: relative;">
 
   </div>
   <!-- Load the Google Maps API -->
