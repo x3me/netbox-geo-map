@@ -7,7 +7,7 @@
 </head>
 <body>
   <h1> Geo map</h1>
-  <label for="statusSelect">Filter by Site Status:</label>
+  <label for="statusSelect">Filter by Status:</label>
   <select id="statusSelect">
     <option value="all">All</option>
     <option value="active">Active</option>
@@ -17,6 +17,15 @@
     <option value="deprovisioning">Deprovisioning</option>
     <option value="decommissioning">Decommissioning</option>
   </select>
+  <br/>
+  <label for="groupSelect">Filter by Group:</label>
+    <select id="groupSelect">
+        <option value="All">All</option>
+        <option value="Distribution">Distribution</option>
+        <option value="Access">Access</option>
+        <option value="Pit">Fiber Pit</option>
+        <option value="Core">Core</option>
+    </select>
     <!-- Create a div to hold the Google Map -->
     <div id="map" style="height: 600px; width: 100%;">
     

@@ -1,24 +1,31 @@
 
 let map
 function initMap() {
-
   const statusSelect = document.getElementById('statusSelect');
-  const defaultStatus = 'all';
+  const groupSelect = document.getElementById('groupSelect');
+  const defaultStatus = 'default';
+  const defaultGroup = 'All';
   let status = defaultStatus;
+  let group = defaultGroup;
 
   statusSelect.addEventListener('change', function () {
     status = statusSelect.value;
-    fetchDataAndCreateMap(status);
+    fetchDataAndCreateMap(status, group);
   });
 
-  fetchDataAndCreateMap(status);
+  groupSelect.addEventListener('change', function () {
+    group = groupSelect.value;
+    fetchDataAndCreateMap(status, group);
+  });
+
+  fetchDataAndCreateMap(status, group);
 }
 
-function fetchDataAndCreateMap(status) {
+function fetchDataAndCreateMap(status, group) {
   fetch('/plugins/geo_map/api/sites')
     .then(response => response.json())
     .then(data => {
-
+      console.log(data)
       const centerCoordinates = calculateCenter(data);
       const mapOptions = {
         center: centerCoordinates,
@@ -27,49 +34,86 @@ function fetchDataAndCreateMap(status) {
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
       const pathsByStatus = {};
+      // console.log(data)
 
-      data.forEach(site => {
-        // let group = (site.group).toLowerCase()
-        // console.log(site)
-        if (status === 'all') {
+      if (status === 'all' || status === 'default' && group === 'All') {
+        // console.log(status, group)
+        data.forEach(site => {
           addMarker({
             location: site.position,
-            // icon: `/assets/icons/${group}_${site.status}.png`,
-            // icon: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
-            content: '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
+            icon: site.icon.url,
+            content: '<img src=' + site.icon.url + '/>' + '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
           });
 
           if (!pathsByStatus[site.status]) {
             pathsByStatus[site.status] = [];
           }
           pathsByStatus[site.status].push(site.position);
-          // console.log(site)
-        } else if (site.status === status) {
-          addMarker({
-            location: site.position,
-            // icon: `/assets/icons/${group}_${site.status}.png`,
-            //  icon: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
-            content: '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
-          });
+        });
 
+      } else if (status === 'all' || status === 'default' && group !== 'All') {
+        data.forEach(site => {
+          if (site.group === group) {
+            addMarker({
+              location: site.position,
+              icon: site.icon.url,
+              content: '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
+            });
+          }
           if (!pathsByStatus[site.status]) {
             pathsByStatus[site.status] = [];
           }
           pathsByStatus[site.status].push(site.position);
+        });
+      } else if (status !== 'all' || status !== 'default') {
+        if(group !== 'All'){
+          data.forEach(site => {
+            if (site.status === status && site.group === group) {
+            
+              addMarker({
+                location: site.position,
+                icon: site.icon.url,
+                content: '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
+              });
+  
+              if (!pathsByStatus[site.status]) {
+                pathsByStatus[site.status] = [];
+              }
+              pathsByStatus[site.status].push(site.position);
+            }
+          })
+        }else{
+          data.forEach(site => {
+            if (site.status === status) {
+              addMarker({
+                location: site.position,
+                icon: site.icon.url,
+                content: '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
+              });
+  
+              if (!pathsByStatus[site.status]) {
+                pathsByStatus[site.status] = [];
+              }
+              pathsByStatus[site.status].push(site.position);
+            }
+          })
         }
-      });
-
-      for (const status in pathsByStatus) {
-        if (pathsByStatus.hasOwnProperty(status)) {
-          const statusPaths = pathsByStatus[status];
-          drawPolyline(statusPaths, status);
-        }
+        
       }
-      if (status === 'all') {
-        console.log('Loading......')
-      } else {
-        console.log('This is all the data whose status is', status)
-        console.log('Loading......')
+    
+      if (status !== 'default' && status !== 'all') {
+        // for (const status in pathsByStatus) {
+        //   if (pathsByStatus.hasOwnProperty(status)) {
+        //     const statusPaths = pathsByStatus[status];
+        //     drawPolyline(statusPaths, status);
+        //   }
+        // }
+        if (status === 'all') {
+          console.log('Loading......')
+        } else {
+          console.log('This is all the data whose status is', status)
+          console.log('Loading......')
+        }
       }
     })
     .catch(error => {
@@ -80,9 +124,9 @@ function fetchDataAndCreateMap(status) {
 function addMarker(data) {
 
   const image = {
-    url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
+    url: data.icon,
     // This marker is 20 pixels wide by 32 pixels high.
-    size: new google.maps.Size(14, 26),
+    // size: new google.maps.Size(16,12),
     // The origin for this image is (0, 0).
     origin: new google.maps.Point(0, 0),
     // The anchor for this image is the base of the flagpole at (0, 32).
@@ -93,9 +137,6 @@ function addMarker(data) {
     map: map,
     icon: image,
   });
-  if (data.icon) {
-    marker.setIcon(data.icon);
-  }
   if (data.content) {
     const infoWindow = new google.maps.InfoWindow({
       content: data.content
@@ -118,7 +159,7 @@ function calculateCenter(data) {
 }
 
 function drawPolyline(path, status) {
-  //console.log(path, status)
+
   const lineSymbolPath = {
     'active': [{ /// 'M 0,1 0,-1', // repeat:1px   //active - solid line
       icon: {
