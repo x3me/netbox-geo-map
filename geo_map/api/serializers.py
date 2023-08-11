@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 class SiteSerializer(NetBoxModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="dcim:site")
+    group = serializers.CharField(source="group.slug", read_only=True)
 
     class Meta:
         model = Site
@@ -13,6 +14,7 @@ class SiteSerializer(NetBoxModelSerializer):
             "url",
             "name",
             "status",
+            "group",
             "latitude",
             "longitude",
         )
