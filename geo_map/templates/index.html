@@ -4,75 +4,125 @@
 {% block title %}Site Map{% endblock %} 
 
 {% block content %}
-<div style="display: flex; flex-direction: row">
+<div style="position: relative;">
+    <div style="display: flex; flex-direction: row;position: absolute; left: 178px; z-index:3;margin-top: 10px;">
     <select
         id="tenantSelect"
         style="
-            margin: 7px;
-            color: rgb(86, 86, 86);
-            font-family: Roboto, Arial, sans-serif;
-            font-size: 18px;
-            background: white;
-            border: none;
-            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            padding: 0px 20px 0px 20px;
-        "
+          color: rgb(86, 86, 86);
+          font-family: Roboto, Arial, sans-serif;
+          font-size: 18px; 
+          background: white; 
+          border: none; 
+          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none; 
+          text-align: center; 
+          height: 40px; 
+          cursor: pointer; 
+          padding: 0 14px;
+          "
     >
         <option>Filter by Vendor</option>
         {% for tenant in tenants %}
             <option value="{{tenant.value}}">{{tenant.label}}</option>
         {% endfor %}
     </select>
+
+    <select 
+        id="fiberLinkStatus" 
+        style="
+          color: rgb(86, 86, 86);
+          font-family: Roboto, Arial, sans-serif;
+          font-size: 18px; 
+          background: white; 
+          border: none; 
+          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none; 
+          text-align: center; 
+          height: 40px; 
+          cursor: pointer; 
+          padding: 0 14px;
+        "
+      >
+        <option>Fiber Link Status</option>
+        <option value=".....">All fiber link statuses</option> </select>
+
     <select
         id="statusSelect"
         style="
-            margin: 7px;
-            color: rgb(86, 86, 86);
-            font-family: Roboto, Arial, sans-serif;
-            font-size: 18px;
-            background: white;
-            border: none;
-            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            padding: 0px 20px 0px 20px;
-        "
+          color: rgb(86, 86, 86);
+          font-family: Roboto, Arial, sans-serif;
+          font-size: 18px; 
+          background: white; 
+          border: none; 
+          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none; 
+          text-align: center; 
+          height: 40px; 
+          cursor: pointer; 
+          padding: 0 14px;
+          "
     >
         <option>Filter by Status</option>
         {% for status in site_statuses %}
             <option value="{{status.value}}">{{status.label}}</option>
         {% endfor %}
     </select>
+
     <select
         id="groupSelect"
         style="
-            margin: 7px;
-            color: rgb(86, 86, 86);
-            font-family: Roboto, Arial, sans-serif;
-            font-size: 18px;
-            background: white;
-            border: none;
-            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            padding: 0px 20px 0px 20px;
-        "
+          color: rgb(86, 86, 86);
+          font-family: Roboto, Arial, sans-serif;
+          font-size: 18px; 
+          background: white; 
+          border: none; 
+          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none; 
+          text-align: center; 
+          height: 40px; 
+          cursor: pointer; 
+          padding: 0 14px;
+          "
     >
         <option>Filter by Group</option>
         {% for group in site_groups %}
             <option value="{{group.value}}">{{group.label}}</option>
         {% endfor %}
     </select>
-</div>
-<!-- Create a div to hold the Google Map -->
-<div id="map" style="height: 600px; width: 100%; position: relative"></div>
-<!-- Load the Google Maps API -->
 
+    <select 
+      id="actions"  style="
+          color: rgb(86, 86, 86);
+          font-family: Roboto, Arial, sans-serif;
+          font-size: 18px; 
+          background: white; 
+          border: none; 
+          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none; 
+          text-align: center; 
+          height: 40px; 
+          cursor: pointer; 
+          padding: 0 14px;
+          "
+    >
+          <option>Actions</option>
+          <option value="export">Export Pops KML</option>
+      </select>
+</div>
+
+<div id="map" style="height: 600px; width: 100%; position: relative"></div>
+</div>
 {% endblock%} 
 
 {% block javascript %}

@@ -4,7 +4,7 @@ function initMap() {
   const statusSelect = document.getElementById('statusSelect');
   const groupSelect = document.getElementById('groupSelect');
   const defaultStatus = 'default';
-  const defaultGroup = 'All';
+  const defaultGroup = 'Pit';
   let status = defaultStatus;
   let group = defaultGroup;
 
@@ -17,6 +17,26 @@ function initMap() {
     group = groupSelect.value;
     fetchDataAndCreateMap(status, group);
   });
+
+  document.getElementById('actions').addEventListener('click', function() {
+    // fetch('your-api-endpoint')
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         const dataBlob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    //         const dataURL = URL.createObjectURL(dataBlob);
+
+    //         const downloadLink = document.createElement('a');
+    //         downloadLink.href = dataURL;
+    //         downloadLink.download = 'data.json';
+    //         downloadLink.click();
+
+    //         URL.revokeObjectURL(dataURL);
+    //     })
+    //     .catch(error => {
+    //         console.error('Error fetching or exporting data:', error);
+    //     });
+    console.log('Export Pops KML');
+});
 
   fetchDataAndCreateMap(status, group);
 }
@@ -41,7 +61,7 @@ function fetchDataAndCreateMap(status, group) {
           addMarker({
             location: site.position,
             icon: site.icon.url,
-            content: '<img src=' + site.icon.url + '/>' + '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
+            content: generateSiteHTML(site),
           });
 
           if (!pathsByStatus[site.status]) {
@@ -53,10 +73,11 @@ function fetchDataAndCreateMap(status, group) {
       } else if (status === 'all' || status === 'default' && group !== 'All') {
         data.forEach(site => {
           if (site.group === group) {
+            //console.log(site.group, group)
             addMarker({
               location: site.position,
               icon: site.icon.url,
-              content: '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
+              content: generateSiteHTML(site),
             });
           }
           if (!pathsByStatus[site.status]) {
@@ -68,11 +89,11 @@ function fetchDataAndCreateMap(status, group) {
         if(group !== 'All'){
           data.forEach(site => {
             if (site.status === status && site.group === group) {
-            
+            console.log(site.status, site.group)
               addMarker({
                 location: site.position,
                 icon: site.icon.url,
-                content: '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
+                content: generateSiteHTML(site),
               });
   
               if (!pathsByStatus[site.status]) {
@@ -84,10 +105,11 @@ function fetchDataAndCreateMap(status, group) {
         }else{
           data.forEach(site => {
             if (site.status === status) {
+              console.log(site.status, status)
               addMarker({
                 location: site.position,
                 icon: site.icon.url,
-                content: '<h5>' + site.title + '</h5><p>Status: ' + site.status + '</p><p>Group: ' + site.group + '</p>',
+                content: generateSiteHTML(site),
               });
   
               if (!pathsByStatus[site.status]) {
@@ -107,12 +129,6 @@ function fetchDataAndCreateMap(status, group) {
         //     drawPolyline(statusPaths, status);
         //   }
         // }
-        if (status === 'all') {
-          console.log('Loading......')
-        } else {
-          console.log('This is all the data whose status is', status)
-          console.log('Loading......')
-        }
       }
     })
     .catch(error => {
@@ -124,11 +140,8 @@ function addMarker(data) {
 
   const image = {
     url: data.icon,
-    // This marker is 20 pixels wide by 32 pixels high.
-    // size: new google.maps.Size(20,32),
-    // The origin for this image is (0, 0).
+    scaledSize: new google.maps.Size(18,18),
     origin: new google.maps.Point(0, 0),
-    // The anchor for this image is the base of the flagpole at (0, 32).
     anchor: new google.maps.Point(0, 32),
   };
   const marker = new google.maps.Marker({
@@ -145,25 +158,6 @@ function addMarker(data) {
     }
     );
   }
-  //
-// new google.maps.Marker({
-//   position: { lat: 36.6163, lng: -100.61 },
-//   map,
-//   icon: {
-//     path: faBus.icon[4],
-//     fillColor: "#0000ff",
-//     fillOpacity: 1,
-//     anchor: new google.maps.Point(
-//       faBus.icon[0] / 2, // width
-//       faBus.icon[1], // height
-//     ),
-//     strokeWeight: 1,
-//     strokeColor: "#ffffff",
-//     scale: 0.075,
-//   },
-//   title: "FontAwesome SVG Marker",
-// });
-//
 }
 
 function calculateCenter(data) {
@@ -175,9 +169,20 @@ function calculateCenter(data) {
 
   return { lat: averageLat, lng: averageLng };
 }
+function generateSiteHTML(site) {
+  
+  return ( "<h6>" + site.title + "</h6>" )
+
+  // return (
+  //     "<img  style='width:24px; height:24px' src='" + site.icon.url + "'/>" +
+  //     "<h5>" + site.title + "</h5>" +
+  //     "<p>Status: " + site.status + "</p>" +
+  //     "<p>Group: " + site.group + "</p>"
+  // );
+}
 
 function drawPolyline(path, status) {
-
+  console.log(status, path)
   const lineSymbolPath = {
     'active': [{ /// 'M 0,1 0,-1', // repeat:1px   //active - solid line
       icon: {
