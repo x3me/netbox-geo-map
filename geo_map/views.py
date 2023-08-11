@@ -1,67 +1,50 @@
+from dcim.choices import SiteStatusChoices
+from dcim.models import SiteGroup
+from django.conf import settings
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db.models import Count
 from django.shortcuts import render
-from dcim.models import *
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.views import View
+from tenancy.models import Tenant
+from dcim.choices import LinkStatusChoices
 
 
-@login_required
-def google_map(request):
-    return render(request, "index.html")
+CONFIG = settings.PLUGINS_CONFIG["geo_map"]
 
-groups = {
-    "Distribution": "distribution",
-    "Access": "access",
-    "Pit": "fiberpit",
-    "Core": "core",
-}
 
-statuses = {
-    "planned": "_planned",
-    "staging": "_staging",
-    "active": "_active",
-    "decommissioning": "_decommissioning",
-    "retired": "_retired",
-}
+class GeoMapHomeView(PermissionRequiredMixin, View):
+    permission_required = ("dcim.view_site", "dcim.view_cable")
 
-@login_required
-def get_sites(request):
-    _sites = Site.objects.exclude(latitude__isnull=True).values(
-        "_name", "latitude", "longitude", "status", "group__name"
-    )
-    site_info_list = []
-    for _site in _sites:
-        site_info_list.append(
+    """
+    Show the home page
+    """
+
+    def get(self, request):
+        site_groups = SiteGroup.objects.all()
+        tenants = (
+            Tenant.objects.annotate(cable_count=Count("cables"))
+            .filter(cable_count__gt=0)
+            .order_by("name")
+        )
+
+        return render(
+            request,
+            "index.html",
             {
-                "title": _site["_name"],
-                "position": {
-                    "lat": float(_site["latitude"]),
-                    "lng": float(_site["longitude"]),
-                },
-                "status": _site["status"],
-                "group": _site["group__name"],
-                "icon": {
-                   "url": f"/static/geo_map/assets/icons/{groups.get(_site['group__name'], 'default_group')}{statuses.get(_site['status'], 'default_status')}.png",
-                },
-            }
+                "google_maps_key": CONFIG["google_maps_key"],
+                "site_statuses": [
+                    {"value": status[0], "label": status[1]}
+                    for status in SiteStatusChoices.CHOICES
+                ],
+                "site_groups": [
+                    {"value": group.id, "label": group.name} for group in site_groups
+                ],
+                "link_statuses": [
+                    {"value": status[0], "label": status[1]}
+                    for status in LinkStatusChoices
+                ],
+                "tenants": [
+                    {"value": tenant.id, "label": tenant.name} for tenant in tenants
+                ],
+            },
         )
-  
-    return JsonResponse(site_info_list, safe=False)
-
-@login_required
-def get_circuits(request):
-    _circuits = Circuit.objects.filter(
-        termination_a__isnull=False, termination_z__isnull=False
-    ).select_related("termination_a__site", "termination_z__site")
-    coords = []
-    for _circuit in _circuits:
-        lat_a = _circuit.termination_a.site.latitude
-        lng_a = _circuit.termination_a.site.longitude
-        lat_z = _circuit.termination_z.site.latitude
-        lng_z = _circuit.termination_z.site.longitude
-        coords.append(
-            [
-                {"lat": float(lat_a), "lng": float(lng_a)},
-                {"lat": float(lat_z), "lng": float(lng_z)},
-            ]
-        )
-    return JsonResponse(coords, safe=False)

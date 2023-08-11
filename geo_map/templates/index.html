@@ -1,58 +1,85 @@
-<!DOCTYPE html>
-{%extends 'base/layout.html'%}
+{%extends 'base/layout.html'%} 
+{% load static %} 
+
+{% block title %}Site Map{% endblock %} 
 
 {% block content %}
-<html>
-{%load static%}
-
-<head>
-  <title>NetBox Google Maps Plugin Test</title>
-  <!-- Add your CSS and any other required meta tags here -->
-</head>
-
-<body>
-
-  <div style="display: flex; flex-direction: row;">
-    <h1> Geo map</h1>
-    <select id="statusSelect" style="margin: 7px; color: rgb(86, 86, 86);font-family: Roboto, Arial, sans-serif;font-size: 18px; background: white; border: none; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none; padding: 0px 20px 0px 20px;
-  ">
-      <option>Filter by Status</option>
-      <option value="all">All</option>
-      <option value="active">Active</option>
-      <option value="planned">Planned</option>
-      <option value="provisioning">Provisioning</option>
-      <option value="offline">Offline</option>
-      <option value="deprovisioning">Deprovisioning</option>
-      <option value="decommissioning">Decommissioning</option>
+<div style="display: flex; flex-direction: row">
+    <select
+        id="tenantSelect"
+        style="
+            margin: 7px;
+            color: rgb(86, 86, 86);
+            font-family: Roboto, Arial, sans-serif;
+            font-size: 18px;
+            background: white;
+            border: none;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding: 0px 20px 0px 20px;
+        "
+    >
+        <option>Filter by Vendor</option>
+        {% for tenant in tenants %}
+            <option value="{{tenant.value}}">{{tenant.label}}</option>
+        {% endfor %}
     </select>
-    <!-- <label for="groupSelect">Filter by Group:</label> -->
-    <select id="groupSelect" style="margin: 7px; color: rgb(86, 86, 86);font-family: Roboto, Arial, sans-serif;font-size: 18px; background: white; border: none; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none; padding: 0px 20px 0px 20px;
-  ">
-      <option>Filter by Group</option>
-      <option value="All">All</option>
-      <option value="Distribution">Distribution</option>
-      <option value="Access">Access</option>
-      <option value="Pit">Fiber Pit</option>
-      <option value="Core">Core</option>
+    <select
+        id="statusSelect"
+        style="
+            margin: 7px;
+            color: rgb(86, 86, 86);
+            font-family: Roboto, Arial, sans-serif;
+            font-size: 18px;
+            background: white;
+            border: none;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding: 0px 20px 0px 20px;
+        "
+    >
+        <option>Filter by Status</option>
+        {% for status in site_statuses %}
+            <option value="{{status.value}}">{{status.label}}</option>
+        {% endfor %}
     </select>
-  </div>
-  <!-- Create a div to hold the Google Map -->
-  <div id="map" style="height: 600px; width: 100%; position: relative;">
+    <select
+        id="groupSelect"
+        style="
+            margin: 7px;
+            color: rgb(86, 86, 86);
+            font-family: Roboto, Arial, sans-serif;
+            font-size: 18px;
+            background: white;
+            border: none;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding: 0px 20px 0px 20px;
+        "
+    >
+        <option>Filter by Group</option>
+        {% for group in site_groups %}
+            <option value="{{group.value}}">{{group.label}}</option>
+        {% endfor %}
+    </select>
+</div>
+<!-- Create a div to hold the Google Map -->
+<div id="map" style="height: 600px; width: 100%; position: relative"></div>
+<!-- Load the Google Maps API -->
 
-  </div>
-  <!-- Load the Google Maps API -->
+{% endblock%} 
 
-  <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoCKdtdIV6CTP5tCHdcmH7GYlSTA4qLAk&callback=initMap"></script>
+{% block javascript %}
+<script
+    async
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap"
+></script>
 
-  <script src="{%static 'geo_map/index.js'%}"></script>
-</body>
-
-</html>
-{% endblock%}
+<script src="{% static 'geo_map/index.js' %}"></script>
+{% endblock %}

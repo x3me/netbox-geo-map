@@ -22,7 +22,7 @@ function initMap() {
 }
 
 function fetchDataAndCreateMap(status, group) {
-  fetch('/plugins/geo_map/api/sites')
+  fetch('/api/plugins/geo_map/sites')
     .then(response => response.json())
     .then(data => {
       const centerCoordinates = calculateCenter(data);
