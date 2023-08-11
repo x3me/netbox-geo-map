@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
- <g class="layer">
-  <title>Layer 1</title>
-  <path d="m215.98,227.99l-175.96,0a28,28 0 0 1 -24.23,-42.02l87.98,-152l0,0a28,28 0 0 1 48.46,0l87.98,152a28,28 0 0 1 -24.23,42.02zm-91.44,-181.99l-87.98,151.99a4,4 0 0 0 3.46,6l175.96,0a4,4 0 0 0 3.46,-6l-87.98,-151.99a4,4 0 0 0 -6.92,0z" fill="#00ff00" id="svg_1" transform="matrix(1 0 0 1 0 0)"/>
-  <rect fill="#00ff00" height="20.99" id="svg_6" transform="rotate(46.5074 127.015 148.008)" width="78.24" x="87.89" y="137.51"/>
-  <rect fill="#00ff00" height="20.99" id="svg_7" transform="rotate(6.49936 127.397 150.107) matrix(-0.617274 0.78721 -0.786431 -0.626286 320.485 142.533)" width="78.24" x="87.05" y="136"/>
- </g>
-</svg>

@@ -1,8 +1,6 @@
 {%extends 'base/layout.html'%} 
 {% load static %} 
 
-{% block title %}Site Map{% endblock %} 
-
 {% block content %}
 <div style="position: relative;">
     <div style="display: flex; flex-direction: row;position: absolute; left: 178px; z-index:3;margin-top: 10px;">
@@ -22,6 +20,7 @@
           height: 40px; 
           cursor: pointer; 
           padding: 0 14px;
+          max-width: 180px;
           "
     >
         <option>Filter by Vendor</option>
@@ -49,8 +48,10 @@
         "
       >
         <option>Fiber Link Status</option>
-        <option value=".....">All fiber link statuses</option> </select>
-
+        {% for status in link_statuses %}
+            <option value="{{status.value}}">{{status.label}}</option>
+        {% endfor %}
+    </select>
     <select
         id="statusSelect"
         style="

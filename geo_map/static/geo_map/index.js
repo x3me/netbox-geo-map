@@ -3,19 +3,26 @@ let map
 function initMap() {
   const statusSelect = document.getElementById('statusSelect');
   const groupSelect = document.getElementById('groupSelect');
+  const linkStatusSelect = document.getElementById('fiberLinkStatus');
   const defaultStatus = 'default';
-  const defaultGroup = 'Pit';
+  const defaultGroup = 'pit';
   let status = defaultStatus;
   let group = defaultGroup;
 
   statusSelect.addEventListener('change', function () {
     status = statusSelect.value;
+    //console.log(statusSelect)
     fetchDataAndCreateMap(status, group);
   });
 
   groupSelect.addEventListener('change', function () {
     group = groupSelect.value;
+    console.log(groupSelect)
     fetchDataAndCreateMap(status, group);
+  });
+
+  linkStatusSelect.addEventListener('change', function () {
+    //console.log(linkStatusSelect);
   });
 
   document.getElementById('actions').addEventListener('click', function() {
@@ -42,99 +49,110 @@ function initMap() {
 }
 
 function fetchDataAndCreateMap(status, group) {
-  fetch('/api/plugins/geo_map/sites')
+  console.log(status, group)
+  fetch('/api/plugins/geo_map/sites/')
     .then(response => response.json())
     .then(data => {
+      console.log(data)
       const centerCoordinates = calculateCenter(data);
       const mapOptions = {
         center: centerCoordinates,
         zoom: 7,
       };
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
-      const pathsByStatus = {};
-      // console.log(data)
-
-      if (status === 'all' || status === 'default' && group === 'All') {
-        // console.log(status, group)
+     // const pathsByStatus = {};
         data.forEach(site => {
+           
           addMarker({
-            location: site.position,
-            icon: site.icon.url,
+            location: {lat:site.latitude, lng:site.longitude},
+            icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
             content: generateSiteHTML(site),
           });
+        })
 
-          if (!pathsByStatus[site.status]) {
-            pathsByStatus[site.status] = [];
-          }
-          pathsByStatus[site.status].push(site.position);
-        });
+      // if (status === 'all' || status === 'default' && group === 'all') {
+      //   data.forEach(site => {
+           
+      //     addMarker({
+      //       location: {...site.latitude, ...site.longitude},
+      //       icon: `static/geo_map/assets/icons/${site.group}_${site.status}.png`,
+      //       content: generateSiteHTML(site),
+      //     });
 
-      } else if (status === 'all' || status === 'default' && group !== 'All') {
-        data.forEach(site => {
-          if (site.group === group) {
-            //console.log(site.group, group)
-            addMarker({
-              location: site.position,
-              icon: site.icon.url,
-              content: generateSiteHTML(site),
-            });
-          }
-          if (!pathsByStatus[site.status]) {
-            pathsByStatus[site.status] = [];
-          }
-          pathsByStatus[site.status].push(site.position);
-        });
-      } else if (status !== 'all' || status !== 'default') {
-        if(group !== 'All'){
-          data.forEach(site => {
-            if (site.status === status && site.group === group) {
-            console.log(site.status, site.group)
-              addMarker({
-                location: site.position,
-                icon: site.icon.url,
-                content: generateSiteHTML(site),
-              });
+      //     if (!pathsByStatus[site.status]) {
+      //       pathsByStatus[site.status] = [];
+      //     }
+      //     pathsByStatus[site.status].push({...site.latitude, ...site.longitude});
+      //   });
+
+      // } else if (status === 'all' || status === 'default' && group !== 'all') {
+      //   data.forEach(site => {
+      //     if (site.group === group) {
+            
+      //       addMarker({
+      //         location: site.position,
+      //         icon: `static/geo_map/assets/icons/${site.group}_${site.status}.png`,
+      //         content: generateSiteHTML(site),
+      //       });
+      //     }
+      //     if (!pathsByStatus[site.status]) {
+      //       pathsByStatus[site.status] = [];
+      //     }
+      //     pathsByStatus[site.status].push({...site.latitude, ...site.longitude});
+      //   });
+      // } else if (status !== 'all' || status !== 'default') {
+      //   console.log(group)
+      //   if(group !== 'all'){
+      //     data.forEach(site => {
+      //       if (site.status === status && site.group === group) {
+      //       console.log(site.status, site.group, 'hoho')
+      //         addMarker({
+      //           location: site.position,
+      //         //  icon: site.icon.url,
+      //           content: generateSiteHTML(site),
+      //         });
   
-              if (!pathsByStatus[site.status]) {
-                pathsByStatus[site.status] = [];
-              }
-              pathsByStatus[site.status].push(site.position);
-            }
-          })
-        }else{
-          data.forEach(site => {
-            if (site.status === status) {
-              console.log(site.status, status)
-              addMarker({
-                location: site.position,
-                icon: site.icon.url,
-                content: generateSiteHTML(site),
-              });
+      //         if (!pathsByStatus[site.status]) {
+      //           pathsByStatus[site.status] = [];
+      //         }
+      //         pathsByStatus[site.status].push({...site.latitude, ...site.longitude});
+      //       }
+      //     })
+      //   }else{
+      //     data.forEach(site => {
+            
+      //       if (site.status === status) {
+      //         console.log(site.status, status)
+      //         addMarker({
+      //           location: site.position,
+      //          // icon: site.icon.url,
+      //           content: generateSiteHTML(site),
+      //         });
   
-              if (!pathsByStatus[site.status]) {
-                pathsByStatus[site.status] = [];
-              }
-              pathsByStatus[site.status].push(site.position);
-            }
-          })
-        }
+      //         if (!pathsByStatus[site.status]) {
+      //           pathsByStatus[site.status] = [];
+      //         }
+      //         pathsByStatus[site.status].push({...site.latitude, ...site.longitude});
+      //       }
+      //     })
+      //   }
         
-      }
+      // }
     
-      if (status !== 'default' && status !== 'all') {
-        // for (const status in pathsByStatus) {
-        //   if (pathsByStatus.hasOwnProperty(status)) {
-        //     const statusPaths = pathsByStatus[status];
-        //     drawPolyline(statusPaths, status);
-        //   }
-        // }
-      }
+      // if (status !== 'default' && status !== 'all') {
+      //   // for (const status in pathsByStatus) {
+      //   //   if (pathsByStatus.hasOwnProperty(status)) {
+      //   //     const statusPaths = pathsByStatus[status];
+      //   //     drawPolyline(statusPaths, status);
+      //   //   }
+      //   // }
+      // }
     })
     .catch(error => {
       console.error('Error fetching site data:', error);
     });
 }
+
 
 function addMarker(data) {
 
@@ -162,23 +180,15 @@ function addMarker(data) {
 
 function calculateCenter(data) {
   const totalSites = data.length;
-  const sumLat = data.reduce((sum, site) => sum + site.position.lat, 0);
-  const sumLng = data.reduce((sum, site) => sum + site.position.lng, 0);
+  const sumLat = data.reduce((sum, site) => sum + site.latitude, 0);
+  const sumLng = data.reduce((sum, site) => sum + site.longitude, 0);
   const averageLat = sumLat / totalSites;
   const averageLng = sumLng / totalSites;
 
   return { lat: averageLat, lng: averageLng };
 }
 function generateSiteHTML(site) {
-  
-  return ( "<h6>" + site.title + "</h6>" )
-
-  // return (
-  //     "<img  style='width:24px; height:24px' src='" + site.icon.url + "'/>" +
-  //     "<h5>" + site.title + "</h5>" +
-  //     "<p>Status: " + site.status + "</p>" +
-  //     "<p>Group: " + site.group + "</p>"
-  // );
+  return ( "<a href=" + site.url + ">" + site.name + "</a>" )
 }
 
 function drawPolyline(path, status) {
