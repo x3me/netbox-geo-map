@@ -26,7 +26,7 @@
         <option value="all">Filter by Vendor</option>
         <option value="all">-- All Vendors --</option>
         {% for tenant in tenants %}
-            <option value="{{tenant.label}}">{{tenant.label}}</option>
+            <option value="{{tenant.value}}">{{tenant.label}}</option>
         {% endfor %}
     </select>
 
@@ -72,7 +72,7 @@
           padding: 0 14px;
           "
     >
-        <option>POP Status</option>
+        <option value="all">POP Status</option>
         <option value="all"> -- All POP Statuses -- </option>
         {% for status in site_statuses %}
             <option value="{{status.value}}">{{status.label}}</option>
@@ -126,7 +126,7 @@
       </select>
 </div>
 
-<div id="map" style="height: 600px; width: 100%; position: relative"></div>
+<div id="map" style="height: 800px; width: 100%; position: relative"></div>
 </div>
 {% endblock%} 
 

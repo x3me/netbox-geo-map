@@ -2,6 +2,8 @@
 let map
 let allSites = [];
 let allLinks = [];
+setMapHeight();
+window.addEventListener('resize', setMapHeight);
 
 function initMap() {
   const statusSelect = document.getElementById('statusSelect');
@@ -9,11 +11,11 @@ function initMap() {
   const linkStatusSelect = document.getElementById('fiberLinkStatus');
   const tenantSelect = document.getElementById('tenantSelect');
   const defaultStatus = 'default';
-  const defaultGroup = 'pitt';     
+  const defaultGroup = 'pit';     
   let status = defaultStatus;
   let group = defaultGroup;
   let linkStatus = 'all';
-  let tenantStatus = 'all';
+  //let tenantStatus = 'all';
 
   statusSelect.addEventListener('change', function () {
     status = statusSelect.value
@@ -32,15 +34,12 @@ function initMap() {
   });
 
   tenantSelect.addEventListener('change', function () {
-    tenantStatus = tenantSelect.value;
-    console.log(allSites)
-    if (tenantStatus !== 'all') {
-      allSites.map(site => {
-        if (site.name.includes(tenantStatus)) {
-          console.log(tenantStatus, site.name)
-        }
-      })
-    }
+    console.log(tenantSelect.value)
+    fetch(`/api/plugins/geo_map/links/?id:${tenantSelect.value}`)
+    .then(response => response.json())
+    .then((data)=>{
+      console.log(data)
+    })
   });
 
   document.getElementById('actions').addEventListener('click', function () {
@@ -90,7 +89,6 @@ function combineData(linksArray, sitesArray, linkStatus) {
       const connection = combinedData[id];
       const { terminations } = connection;
       if (terminations.length > 1 && connection.status && connection.status === linkStatus) {
-        console.log(terminations.length, connection.status, linkStatus)
         drawPolyline(terminations, connection)
       }else if(terminations.length > 1 && linkStatus === 'all'){
         drawPolyline(terminations, connection)
@@ -106,7 +104,6 @@ function combineData(linksArray, sitesArray, linkStatus) {
     }
   }
   console.log(combinedData)
-  //console.log(allLinks, allSites, combinedData)
 }
 
 function fetchAndDrawPolylinesOnMap(linkStatus) {
@@ -124,44 +121,20 @@ function fetchAndDrawPolylinesOnMap(linkStatus) {
 
 
 function fetchDataAndCreateMap(status, group) {
-  
-  fetch('/api/plugins/geo_map/sites/')
+  const API_CALL = status !== 'default' && status !== 'all' ? 
+                                                  `/api/plugins/geo_map/sites/?status=${status}` : 
+                                                  `/api/plugins/geo_map/sites/`
+  fetch(API_CALL)
     .then(response => response.json())
     .then(data => {
       allSites = JSON.parse(JSON.stringify(data))
-      //   {
-      //     "id": 33776,
-      //     "url": "http://sof-lab-3.vm.x3me.net:8000/dcim/sites/33776/",
-      //     "name": "Bulandshahar (Friends Br)",
-      //     "status": "active",
-      //     "group": "access",
-      //     "latitude": 28.72622,
-      //     "longitude": 77.77511
-      // }
-      console.log(data)
       const centerCoordinates = calculateCenter(data);
       const mapOptions = {
         center: centerCoordinates,
         zoom: 7,
       };
-      map = new google.maps.Map(document.getElementById("map"), mapOptions);
-      // data.forEach(site => {
-      //   addMarker({
-      //     location: {lat:site.latitude, lng:site.longitude},
-      //     icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
-      //     content: generateSiteHTML(site),
-      //   });
-      // })
-      if (status === 'all' || status === 'default' && group === 'all') {
-        data.forEach(site => {
-          addMarker({
-            location: { lat: site.latitude, lng: site.longitude },
-            icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
-            content: generateSiteHTML(site),
-          });
-        });
-
-      } else if (status === 'all' || status === 'default' && group !== 'all') {
+       if(group !== 'all') {
+        map = new google.maps.Map(document.getElementById("map"), mapOptions);
         data.forEach(site => {
           if (site.group === group || site.group === 'pit') {
             addMarker({
@@ -171,28 +144,15 @@ function fetchDataAndCreateMap(status, group) {
             });
           }
         });
-      } else if (status !== 'all' || status !== 'default') {
-        if (group !== 'all') {
-          data.forEach(site => {
-            if (site.status === status && site.group === group || site.group === 'pit') {
-              addMarker({
-                location: { lat: site.latitude, lng: site.longitude },
-                icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
-                content: generateSiteHTML(site),
-              });
-            }
-          })
-        } else {
-          data.forEach(site => {
-            if (site.status === status || site.group === 'pit') {
-              addMarker({
-                location: { lat: site.latitude, lng: site.longitude },
-                icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
-                content: generateSiteHTML(site),
-              });
-            }
-          })
-        }
+      }else {
+        map = new google.maps.Map(document.getElementById("map"), mapOptions);
+        data.forEach(site => {
+          addMarker({
+            location: {lat:site.latitude, lng:site.longitude},
+            icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
+            content: generateSiteHTML(site),
+          });
+        })
       }
     })
     .catch(error => {
@@ -206,7 +166,7 @@ function addMarker(data) {
     url: data.icon,
     scaledSize: new google.maps.Size(14,14),
     origin: new google.maps.Point(0, 0),
-    anchor: new google.maps.Point(0, 32),
+    anchor: new google.maps.Point(7,7),
   };
   const marker = new google.maps.Marker({
     position: data.location,
@@ -347,10 +307,15 @@ function drawPolyline(terminations, connection, clear) {
       geodesic: true,
       strokeOpacity: 0,
       icons: [
-        ...lineSymbolPath['decommissioning']
+        ...lineSymbolPath[status]
       ],
     });
     polyline.setMap(map);
   }
 }
 window.initMap = initMap 
+
+function setMapHeight() {
+  const mapContainer = document.getElementById('map');
+  mapContainer.style.height = `${window.innerHeight -280}px`;
+}
