@@ -26,7 +26,6 @@ class GeoMapHomeView(PermissionRequiredMixin, View):
             .filter(cable_count__gt=0)
             .order_by("name")
         )
-
         return render(
             request,
             "index.html",

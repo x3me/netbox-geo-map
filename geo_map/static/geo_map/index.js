@@ -1,31 +1,49 @@
 
 let map
+let allSites = [];
+let allLinks = [];
+
 function initMap() {
   const statusSelect = document.getElementById('statusSelect');
   const groupSelect = document.getElementById('groupSelect');
   const linkStatusSelect = document.getElementById('fiberLinkStatus');
+  const tenantSelect = document.getElementById('tenantSelect');
   const defaultStatus = 'default';
-  const defaultGroup = 'pit';
+  const defaultGroup = 'pitt';     
   let status = defaultStatus;
   let group = defaultGroup;
+  let linkStatus = 'all';
+  let tenantStatus = 'all';
 
   statusSelect.addEventListener('change', function () {
-    status = statusSelect.value;
-    //console.log(statusSelect)
+    status = statusSelect.value
     fetchDataAndCreateMap(status, group);
   });
 
   groupSelect.addEventListener('change', function () {
-    group = groupSelect.value;
-    console.log(groupSelect)
+    group = (groupSelect.value).toLowerCase()
     fetchDataAndCreateMap(status, group);
   });
 
   linkStatusSelect.addEventListener('change', function () {
-    //console.log(linkStatusSelect);
+    linkStatus = linkStatusSelect.value
+    fetchAndDrawPolylinesOnMap(linkStatus);
+    combineData(allLinks, allSites, linkStatus);
   });
 
-  document.getElementById('actions').addEventListener('click', function() {
+  tenantSelect.addEventListener('change', function () {
+    tenantStatus = tenantSelect.value;
+    console.log(allSites)
+    if (tenantStatus !== 'all') {
+      allSites.map(site => {
+        if (site.name.includes(tenantStatus)) {
+          console.log(tenantStatus, site.name)
+        }
+      })
+    }
+  });
+
+  document.getElementById('actions').addEventListener('click', function () {
     // fetch('your-api-endpoint')
     //     .then(response => response.json())
     //     .then(data => {
@@ -43,16 +61,83 @@ function initMap() {
     //         console.error('Error fetching or exporting data:', error);
     //     });
     console.log('Export Pops KML');
-});
-
+  });
   fetchDataAndCreateMap(status, group);
 }
 
+function combineData(linksArray, sitesArray, linkStatus) {
+  const combinedData = {};
+
+  if (linksArray.length && sitesArray.length) {
+    linksArray.forEach(connection => {
+      const { id, status, terminations, color } = connection;
+      const connectedSites = terminations.map(termination => termination.site);
+      const siteDetails = sitesArray.filter(site => connectedSites.includes(site.id));
+
+      const combinedObject = {
+        id,
+        status,
+        color,
+        terminations: siteDetails,
+      };
+
+      combinedData[id] = combinedObject;
+    });
+  }
+
+  for (const id in combinedData) {
+    if (combinedData.hasOwnProperty(id)) {
+      const connection = combinedData[id];
+      const { terminations } = connection;
+      if (terminations.length > 1 && connection.status && connection.status === linkStatus) {
+        console.log(terminations.length, connection.status, linkStatus)
+        drawPolyline(terminations, connection)
+      }else if(terminations.length > 1 && linkStatus === 'all'){
+        drawPolyline(terminations, connection)
+      }
+
+      terminations.forEach(termination => {
+        addMarker({
+          location: { lat: termination.latitude, lng: termination.longitude },
+          icon: `/static/geo_map/assets/icons/${termination.group}_${termination.status}.png`,
+          content: generateSiteHTML(termination),
+        });
+      });
+    }
+  }
+  console.log(combinedData)
+  //console.log(allLinks, allSites, combinedData)
+}
+
+function fetchAndDrawPolylinesOnMap(linkStatus) {
+
+ // fetch('/api/plugins/geo_map/links/?tenant=')
+ fetch('/api/plugins/geo_map/links/')
+    .then(response => response.json())
+    .then(data => {
+      combineData(data, allSites, linkStatus);
+    })
+    .catch(error => {
+      console.error('Error fetching site data:', error);
+    });
+}
+
+
 function fetchDataAndCreateMap(status, group) {
-  console.log(status, group)
+  
   fetch('/api/plugins/geo_map/sites/')
     .then(response => response.json())
     .then(data => {
+      allSites = JSON.parse(JSON.stringify(data))
+      //   {
+      //     "id": 33776,
+      //     "url": "http://sof-lab-3.vm.x3me.net:8000/dcim/sites/33776/",
+      //     "name": "Bulandshahar (Friends Br)",
+      //     "status": "active",
+      //     "group": "access",
+      //     "latitude": 28.72622,
+      //     "longitude": 77.77511
+      // }
       console.log(data)
       const centerCoordinates = calculateCenter(data);
       const mapOptions = {
@@ -60,93 +145,55 @@ function fetchDataAndCreateMap(status, group) {
         zoom: 7,
       };
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
-     // const pathsByStatus = {};
+      // data.forEach(site => {
+      //   addMarker({
+      //     location: {lat:site.latitude, lng:site.longitude},
+      //     icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
+      //     content: generateSiteHTML(site),
+      //   });
+      // })
+      if (status === 'all' || status === 'default' && group === 'all') {
         data.forEach(site => {
-           
           addMarker({
-            location: {lat:site.latitude, lng:site.longitude},
+            location: { lat: site.latitude, lng: site.longitude },
             icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
             content: generateSiteHTML(site),
           });
-        })
+        });
 
-      // if (status === 'all' || status === 'default' && group === 'all') {
-      //   data.forEach(site => {
-           
-      //     addMarker({
-      //       location: {...site.latitude, ...site.longitude},
-      //       icon: `static/geo_map/assets/icons/${site.group}_${site.status}.png`,
-      //       content: generateSiteHTML(site),
-      //     });
-
-      //     if (!pathsByStatus[site.status]) {
-      //       pathsByStatus[site.status] = [];
-      //     }
-      //     pathsByStatus[site.status].push({...site.latitude, ...site.longitude});
-      //   });
-
-      // } else if (status === 'all' || status === 'default' && group !== 'all') {
-      //   data.forEach(site => {
-      //     if (site.group === group) {
-            
-      //       addMarker({
-      //         location: site.position,
-      //         icon: `static/geo_map/assets/icons/${site.group}_${site.status}.png`,
-      //         content: generateSiteHTML(site),
-      //       });
-      //     }
-      //     if (!pathsByStatus[site.status]) {
-      //       pathsByStatus[site.status] = [];
-      //     }
-      //     pathsByStatus[site.status].push({...site.latitude, ...site.longitude});
-      //   });
-      // } else if (status !== 'all' || status !== 'default') {
-      //   console.log(group)
-      //   if(group !== 'all'){
-      //     data.forEach(site => {
-      //       if (site.status === status && site.group === group) {
-      //       console.log(site.status, site.group, 'hoho')
-      //         addMarker({
-      //           location: site.position,
-      //         //  icon: site.icon.url,
-      //           content: generateSiteHTML(site),
-      //         });
-  
-      //         if (!pathsByStatus[site.status]) {
-      //           pathsByStatus[site.status] = [];
-      //         }
-      //         pathsByStatus[site.status].push({...site.latitude, ...site.longitude});
-      //       }
-      //     })
-      //   }else{
-      //     data.forEach(site => {
-            
-      //       if (site.status === status) {
-      //         console.log(site.status, status)
-      //         addMarker({
-      //           location: site.position,
-      //          // icon: site.icon.url,
-      //           content: generateSiteHTML(site),
-      //         });
-  
-      //         if (!pathsByStatus[site.status]) {
-      //           pathsByStatus[site.status] = [];
-      //         }
-      //         pathsByStatus[site.status].push({...site.latitude, ...site.longitude});
-      //       }
-      //     })
-      //   }
-        
-      // }
-    
-      // if (status !== 'default' && status !== 'all') {
-      //   // for (const status in pathsByStatus) {
-      //   //   if (pathsByStatus.hasOwnProperty(status)) {
-      //   //     const statusPaths = pathsByStatus[status];
-      //   //     drawPolyline(statusPaths, status);
-      //   //   }
-      //   // }
-      // }
+      } else if (status === 'all' || status === 'default' && group !== 'all') {
+        data.forEach(site => {
+          if (site.group === group || site.group === 'pit') {
+            addMarker({
+              location: { lat: site.latitude, lng: site.longitude },
+              icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
+              content: generateSiteHTML(site),
+            });
+          }
+        });
+      } else if (status !== 'all' || status !== 'default') {
+        if (group !== 'all') {
+          data.forEach(site => {
+            if (site.status === status && site.group === group || site.group === 'pit') {
+              addMarker({
+                location: { lat: site.latitude, lng: site.longitude },
+                icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
+                content: generateSiteHTML(site),
+              });
+            }
+          })
+        } else {
+          data.forEach(site => {
+            if (site.status === status || site.group === 'pit') {
+              addMarker({
+                location: { lat: site.latitude, lng: site.longitude },
+                icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
+                content: generateSiteHTML(site),
+              });
+            }
+          })
+        }
+      }
     })
     .catch(error => {
       console.error('Error fetching site data:', error);
@@ -155,10 +202,9 @@ function fetchDataAndCreateMap(status, group) {
 
 
 function addMarker(data) {
-
   const image = {
     url: data.icon,
-    scaledSize: new google.maps.Size(18,18),
+    scaledSize: new google.maps.Size(14,14),
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(0, 32),
   };
@@ -188,52 +234,52 @@ function calculateCenter(data) {
   return { lat: averageLat, lng: averageLng };
 }
 function generateSiteHTML(site) {
-  return ( "<a href=" + site.url + ">" + site.name + "</a>" )
+  return ("<a href=" + site.url + ">" + site.name + "</a>")
 }
 
-function drawPolyline(path, status) {
-  console.log(status, path)
+function drawPolyline(terminations, connection, clear) {
+
   const lineSymbolPath = {
-    'active': [{ /// 'M 0,1 0,-1', // repeat:1px   //active - solid line
+    'active': [{   //active - solid line
       icon: {
         path: 'M 0,1 0,-1',
         strokeOpacity: 1,
         scale: 2,
-        strokeWeight: 1,
-        // strokeColor: '#F7F700',
+        strokeWeight: 2,
+        strokeColor: connection.color, 
       },
       offset: "0",
       repeat: "1px",
     },],
-    'planned': [{ //'M 0,-2 0,1', // repeat:15px //planned - dashed line
+    'planned': [{ //planned - dashed line
       icon: {
         path: 'M 0,-2 0,1',
         strokeOpacity: 1,
         scale: 2,
-        strokeWeight: 1,
-        // strokeColor: options.strokeColor,
+        strokeWeight: 2,
+        strokeColor: connection.color,
       },
       offset: "0",
       repeat: "15px",
     },],
-    'offline': [{ //'M 0,3 0,2', //repeat:10px  // offline - dotted line
+    'offline': [{   // offline - dotted line
       icon: {
         path: 'M 0,3 0,2',
         strokeOpacity: 1,
         scale: 2,
-        strokeWeight: 1,
-        // strokeColor: options.strokeColor,
+        strokeWeight: 2,
+        strokeColor: connection.color,
       },
       offset: "0",
       repeat: "10px",
     },],
-    'provisioning': [{ //'M 0,-5 0,5', //repeat:30px    //provisioning - longdash
+    'provisioning': [{  //provisioning - longdash
       icon: {
         path: 'M 0,-5 0,5',
         strokeOpacity: 1,
         scale: 2,
-        strokeWeight: 1,
-        // strokeColor: options.strokeColor,
+        strokeWeight: 2,
+        strokeColor: connection.color,
       },
       offset: "0",
       repeat: "30px",
@@ -243,8 +289,8 @@ function drawPolyline(path, status) {
         path: 'M 0,3 0,2',
         strokeOpacity: 1,
         scale: 2,
-        strokeWeight: 1,
-        // strokeColor: options.strokeColor,
+        strokeWeight: 2,
+        strokeColor: connection.color,
       },
       offset: "0",
       repeat: "10px",
@@ -254,8 +300,8 @@ function drawPolyline(path, status) {
         path: 'M 0,-2 0,1',
         strokeOpacity: 1,
         scale: 2,
-        strokeWeight: 1,
-        // strokeColor: options.strokeColor,
+        strokeWeight: 2,
+        strokeColor: connection.color,
       },
       offset: "0",
       repeat: "15px",
@@ -265,8 +311,8 @@ function drawPolyline(path, status) {
         path: 'M 0,3 0,2',
         strokeOpacity: 1,
         scale: 2,
-        strokeWeight: 1,
-        strokeColor: '#FF0000'
+        strokeWeight: 2,
+        strokeColor: connection.color, 
       },
       offset: "0",
       repeat: "10px",
@@ -276,24 +322,35 @@ function drawPolyline(path, status) {
         path: 'M 0,-2 0,1',
         strokeOpacity: 1,
         scale: 2,
-        strokeWeight: 1,
-        strokeColor: '#FF0000'
+        strokeWeight: 2,
+        strokeColor: connection.color, 
       },
       offset: "0",
       repeat: "15px",
     },],
   }
+  let status;
+  let paths = terminations.map(t => {
+    addMarker({
+      location: { lat: t.latitude, lng: t.longitude },
+      icon: `/static/geo_map/assets/icons/${t.group}_${t.status}.png`,
+      content: generateSiteHTML(t),
+    });
+    status = t.status;
 
-
-  const polyline = new google.maps.Polyline({
-    path: path,
-    geodesic: true,
-    strokeOpacity: 0,
-    icons: [
-      ...lineSymbolPath[status]
-    ],
-  });
-
-  polyline.setMap(map);
+    return { lat: t.latitude, lng: t.longitude }
+  })
+ 
+  if(status){
+    const polyline = new google.maps.Polyline({
+      path: paths,
+      geodesic: true,
+      strokeOpacity: 0,
+      icons: [
+        ...lineSymbolPath['decommissioning']
+      ],
+    });
+    polyline.setMap(map);
+  }
 }
-window.initMap = initMap
+window.initMap = initMap 

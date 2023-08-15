@@ -23,9 +23,10 @@
           max-width: 180px;
           "
     >
-        <option>Filter by Vendor</option>
+        <option value="all">Filter by Vendor</option>
+        <option value="all">-- All Vendors --</option>
         {% for tenant in tenants %}
-            <option value="{{tenant.value}}">{{tenant.label}}</option>
+            <option value="{{tenant.label}}">{{tenant.label}}</option>
         {% endfor %}
     </select>
 
@@ -48,6 +49,7 @@
         "
       >
         <option>Fiber Link Status</option>
+        <option value="all"> -- All Fiber Link Statuses -- </option>
         {% for status in link_statuses %}
             <option value="{{status.value}}">{{status.label}}</option>
         {% endfor %}
@@ -70,7 +72,8 @@
           padding: 0 14px;
           "
     >
-        <option>Filter by Status</option>
+        <option>POP Status</option>
+        <option value="all"> -- All POP Statuses -- </option>
         {% for status in site_statuses %}
             <option value="{{status.value}}">{{status.label}}</option>
         {% endfor %}
@@ -94,9 +97,10 @@
           padding: 0 14px;
           "
     >
-        <option>Filter by Group</option>
+        <option>POP Groups</option>
+        <option value="all"> -- All groups -- </option>
         {% for group in site_groups %}
-            <option value="{{group.value}}">{{group.label}}</option>
+            <option value="{{group.label}}">{{group.label}}</option>
         {% endfor %}
     </select>
 
