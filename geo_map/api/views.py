@@ -1,6 +1,7 @@
 from dcim.models import Cable, Site
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.db.models import Count, Q
+from django.db.models import Count
+from django_filters import rest_framework as filters
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -18,12 +19,30 @@ class ListModelMixin:
         return Response(serializer.data)
 
 
+class SiteFilter(filters.FilterSet):
+    class Meta:
+        model = Site
+        fields = {
+            "status": ["exact", "in"],
+            "group": ["exact", "in"],
+        }
+
+
+class CableFilter(filters.FilterSet):
+    class Meta:
+        model = Cable
+        fields = {
+            "status": ["exact", "in"],
+            "tenant": ["exact", "in"],
+        }
+
+
 class SiteViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
     permission_required = "dcim.view_site"
 
     queryset = Site.objects.exclude(latitude__isnull=True)
     serializer_class = SiteSerializer
-    filterset_fields = ["status", "group"]
+    filterset_class = SiteFilter
 
 
 class CableViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
@@ -31,7 +50,7 @@ class CableViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
 
     queryset = Cable.objects.all().prefetch_related("tenant", "terminations")
     serializer_class = CableSerializer
-    filterset_fields = ["status", "tenant"]
+    filterset_class = CableFilter
 
     def get_queryset(self):
         qs = super().get_queryset()
