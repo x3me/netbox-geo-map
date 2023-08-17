@@ -1,7 +1,9 @@
 {%extends 'base/layout.html'%} 
 {% load static %} 
 
-{% block content %}
+{% block header %}{% endblock %} 
+
+{% block content-wrapper %}
 <div style="position: relative;">
     <div style="display: flex; flex-direction: row;position: absolute; left: 178px; z-index:3;margin-top: 10px;">
     <select
@@ -126,7 +128,7 @@
       </select>
 </div>
 
-<div id="map" style="height: 800px; width: 100%; position: relative"></div>
+<div id="map" style="height: 200px; width: 100%; position: relative"></div>
 </div>
 {% endblock%} 
 

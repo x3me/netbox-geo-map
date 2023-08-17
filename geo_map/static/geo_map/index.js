@@ -3,6 +3,12 @@ let map
 let allSites = [];
 let allLinks = [];
 const displayedPolylines = [];
+
+const content = document.querySelector("#content")
+const mapContainer = document.querySelector('#map');
+function setMapHeight() {
+  mapContainer.style.height = content.clientHeight + 'px';
+}
 setMapHeight();
 window.addEventListener('resize', setMapHeight);
 
@@ -312,10 +318,6 @@ function drawPolyline(terminations, connection) {
   }
 }
 
-function setMapHeight() {
-  const mapContainer = document.getElementById('map');
-  mapContainer.style.height = `${window.innerHeight - 280}px`;
-}
 
 function clearDisplayedPolylines() {
   for (const polyline of displayedPolylines) {
