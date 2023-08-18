@@ -1,142 +1,100 @@
-{%extends 'base/layout.html'%} 
-{% load static %} 
+{% extends 'base/layout.html' %}
 
-{% block header %}{% endblock %} 
+{% load static %}
+
+{% block header %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
+<link rel="stylesheet" href="{% static 'geo_map/multiselect.css' %}">
+{% endblock %}
 
 {% block content-wrapper %}
 <div style="position: relative;">
-    <div style="display: flex; flex-direction: row;position: absolute; left: 178px; z-index:3;margin-top: 10px;">
-    <select
-        id="tenantSelect"
-        style="
-          color: rgb(86, 86, 86);
-          font-family: Roboto, Arial, sans-serif;
-          font-size: 18px; 
-          background: white; 
-          border: none; 
-          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          appearance: none; 
-          text-align: center; 
-          height: 40px; 
-          cursor: pointer; 
-          padding: 0 14px;
-          max-width: 180px;
-          "
-    >
-        <option value="all">Filter by Vendor</option>
-        <option value="all">-- All Vendors --</option>
-        {% for tenant in tenants %}
-            <option value="{{tenant.value}}">{{tenant.label}}</option>
-        {% endfor %}
-    </select>
+    <div style="display: flex; flex-direction:row;position: absolute; left: 178px; z-index:3; margin-top: 10px;">
+        <select 
+            name="tenantSelect"
+            id="tenantSelect"
+            multiple 
+            multiselect-search="true" 
+            multiselect-select-all="true" 
+            multiselect-max-items="3"
+            placeholder="Filter by Vendor" 
+        >
+            {% for tenant in tenants %}
+                <option value="{{tenant.value}}">{{tenant.label}}</option>
+            {% endfor %}
+        </select>
+        <select 
+            name="fiberLinkStatus"
+            id="fiberLinkStatus"
+            multiple 
+            multiselect-search="true" 
+            multiselect-select-all="true" 
+            multiselect-max-items="3"
+            placeholder="Fiber Link Status" 
+        >
+            {% for status in link_statuses %}
+                <option value="{{status.value}}">{{status.label}}</option>
+            {% endfor %}
+        </select>
+        <select 
+            name="statusSelect"
+            id="statusSelect"
+            multiple 
+            multiselect-search="true" 
+            multiselect-select-all="true" 
+            multiselect-max-items="3"
+            placeholder="POP Status" 
+        >
+            {% for status in site_statuses %}
+                <option value="{{status.value}}">{{status.label}}</option>
+            {% endfor %}
+        </select>
+        <select 
+            name="groupSelect"
+            id="groupSelect"
+            multiple 
+            multiselect-search="true" 
+            multiselect-select-all="true" 
+            multiselect-max-items="3"
+            placeholder="POP Groups" 
+        >
+            {% for group in site_groups %}
+                <option value="{{group.label}}">{{group.label}}</option>
+            {% endfor %}
+        </select>
+        <select
+            id="actions"
+            style="
+                color: rgb(86, 86, 86);
+                font-family: Roboto, Arial, sans-serif;
+                font-size: 18px;
+                background: white;
+                border: none;
+                box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                text-align: center;
+                height: 40px;
+                cursor: pointer;
+                padding: 0 14px;
+            "
+        >
+            <option>Actions</option>
+            <option value="export">Export Pops KML</option>
+        </select>
+    </div>
 
-    <select 
-        id="fiberLinkStatus" 
-        style="
-          color: rgb(86, 86, 86);
-          font-family: Roboto, Arial, sans-serif;
-          font-size: 18px; 
-          background: white; 
-          border: none; 
-          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          appearance: none; 
-          text-align: center; 
-          height: 40px; 
-          cursor: pointer; 
-          padding: 0 14px;
-        "
-      >
-        <option>Fiber Link Status</option>
-        <option value="all"> -- All Fiber Link Statuses -- </option>
-        {% for status in link_statuses %}
-            <option value="{{status.value}}">{{status.label}}</option>
-        {% endfor %}
-    </select>
-    <select
-        id="statusSelect"
-        style="
-          color: rgb(86, 86, 86);
-          font-family: Roboto, Arial, sans-serif;
-          font-size: 18px; 
-          background: white; 
-          border: none; 
-          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          appearance: none; 
-          text-align: center; 
-          height: 40px; 
-          cursor: pointer; 
-          padding: 0 14px;
-          "
-    >
-        <option value="all">POP Status</option>
-        <option value="all"> -- All POP Statuses -- </option>
-        {% for status in site_statuses %}
-            <option value="{{status.value}}">{{status.label}}</option>
-        {% endfor %}
-    </select>
-
-    <select
-        id="groupSelect"
-        style="
-          color: rgb(86, 86, 86);
-          font-family: Roboto, Arial, sans-serif;
-          font-size: 18px; 
-          background: white; 
-          border: none; 
-          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          appearance: none; 
-          text-align: center; 
-          height: 40px; 
-          cursor: pointer; 
-          padding: 0 14px;
-          "
-    >
-        <option>POP Groups</option>
-        <option value="all"> -- All groups -- </option>
-        {% for group in site_groups %}
-            <option value="{{group.label}}">{{group.label}}</option>
-        {% endfor %}
-    </select>
-
-    <select 
-      id="actions"  style="
-          color: rgb(86, 86, 86);
-          font-family: Roboto, Arial, sans-serif;
-          font-size: 18px; 
-          background: white; 
-          border: none; 
-          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          appearance: none; 
-          text-align: center; 
-          height: 40px; 
-          cursor: pointer; 
-          padding: 0 14px;
-          "
-    >
-          <option>Actions</option>
-          <option value="export">Export Pops KML</option>
-      </select>
+    <div id="map" style="height: 200px; width: 100%; position: relative;"></div>
 </div>
-
-<div id="map" style="height: 200px; width: 100%; position: relative"></div>
-</div>
-{% endblock%} 
+{% endblock %}
 
 {% block javascript %}
 <script
     async
     src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap"
 ></script>
-
 <script src="{% static 'geo_map/index.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
+<script src="{% static 'geo_map/multiselect.js' %}"></script>
 {% endblock %}
