@@ -100,7 +100,7 @@ function combineData(linksArray, sitesArray, selectedLinkStatuses, selectedTenan
           terminations.forEach(termination => {
             addMarker({
               location: { lat: termination.latitude, lng: termination.longitude },
-              icon: `/static/geo_map/assets/icons/${termination.group}_${termination.status}.png`,
+              icon: `/static/geo_map/assets/icons/${termination.group}_${termination.status}.svg`,
               content: generateSiteHTML(termination),
             });
           });
@@ -147,7 +147,7 @@ function fetchDataAndCreateMap(selectedStatuses, selectedGroups) {
           if (site.group === 'pit') {
             addMarker({
               location: { lat: site.latitude, lng: site.longitude },
-              icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
+              icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
               content: generateSiteHTML(site),
             });
           }
@@ -156,7 +156,7 @@ function fetchDataAndCreateMap(selectedStatuses, selectedGroups) {
         data.forEach(site => {
           addMarker({
             location: { lat: site.latitude, lng: site.longitude },
-            icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.png`,
+            icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
             content: generateSiteHTML(site),
           });
 
@@ -290,7 +290,7 @@ function drawPolyline(terminations, connection) {
     if (t.latitude !== 0 && t.longitude !== 0) {
       addMarker({
         location: { lat: t.latitude, lng: t.longitude },
-        icon: `/static/geo_map/assets/icons/${t.group}_${t.status}.png`,
+        icon: `/static/geo_map/assets/icons/${t.group}_${t.status}.svg`,
         content: generateSiteHTML(t),
       });
       status = t.status;

@@ -22,7 +22,7 @@ function MultiselectDropdown(options) {
     });
     return e;
   }
-  
+
   document.querySelectorAll("select[multiple]").forEach((el, k) => {
 
     let div = newEl('div', { class: 'multiselect-dropdown', style: { width: config.style?.width ?? el.clientWidth + 'px', padding: config.style?.padding ?? '' } });
@@ -90,11 +90,11 @@ function MultiselectDropdown(options) {
       div.refresh = () => {
         div.querySelectorAll('span.optext, span.placeholder').forEach(t => div.removeChild(t));
         let sels = Array.from(el.selectedOptions);
-        if (sels.length > (el.attributes['multiselect-max-items']?.value ?? 5)) {
+        if (sels.length > 2) {
           div.appendChild(newEl('span', { class: ['optext', 'maxselected'], text: sels.length + ' ' + config.txtSelected }));
         }
         else {
-       
+
           sels.map(x => {
             let c = newEl('span', { class: 'optext', text: x.text, srcOption: x });
             if ((el.attributes['multiselect-hide-x']?.value !== 'true'))
