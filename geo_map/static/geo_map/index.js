@@ -18,6 +18,8 @@ function initMap() {
   const linkStatusSelect = document.getElementById('fiberLinkStatus');
   const statusSelect = document.getElementById('statusSelect');
   const groupSelect = document.getElementById('groupSelect');
+  const actions = document.getElementById('actions');
+  const actionsContent = document.getElementById('actions-content');
 
   let selectedTenants = [];
   let selectedLinkStatuses = [];
@@ -50,7 +52,13 @@ function initMap() {
     }
   });
 
-  document.getElementById('actions').addEventListener('click', function () {
+  actions.addEventListener('click', function (event) {
+    actionsContent.style.display = 'block';
+    actions.disabled = true;
+    event.stopPropagation();
+
+  });
+  actionsContent.addEventListener('click', function () {
     // fetch('your-api-endpoint')
     //     .then(response => response.json())
     //     .then(data => {
@@ -66,7 +74,16 @@ function initMap() {
     //         console.error('Error fetching or exporting data:', error);
     //     });
     console.log('Export Pops KML');
+    actionsContent.style.display = 'none';
+    actions.disabled = false;
   });
+  document.addEventListener('click', function (event) {
+    if (!actionsContent.contains(event.target)) {
+      actionsContent.style.display = 'none';
+      actions.disabled = false;
+    }
+  });
+
   fetchDataAndCreateMap(selectedStatuses, selectedGroups);
 }
 
@@ -94,7 +111,7 @@ function combineData(linksArray, sitesArray, selectedLinkStatuses, selectedTenan
         if (combinedData.hasOwnProperty(id)) {
           const connection = combinedData[id];
           const { terminations } = connection;
-          if (terminations.length > 1 && connection.status && selectedLinkStatuses.length && selectedLinkStatuses.includes(connection.status)) {
+          if (terminations.length > 1 && connection.status && selectedLinkStatuses.includes(connection.status) && selectedLinkStatuses.length && selectedLinkStatuses.includes(connection.status)) {
             drawPolyline(terminations, connection)
           }
           terminations.forEach(termination => {
@@ -153,14 +170,25 @@ function fetchDataAndCreateMap(selectedStatuses, selectedGroups) {
           }
         })
       } else {
-        data.forEach(site => {
-          addMarker({
-            location: { lat: site.latitude, lng: site.longitude },
-            icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
-            content: generateSiteHTML(site),
+        if (selectedGroups.length) {
+          data.forEach(site => {
+            if (selectedGroups.includes(site.group)) {
+              addMarker({
+                location: { lat: site.latitude, lng: site.longitude },
+                icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
+                content: generateSiteHTML(site),
+              });
+            }
           });
-
-        });
+        } else {
+          data.forEach(site => {
+            addMarker({
+              location: { lat: site.latitude, lng: site.longitude },
+              icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
+              content: generateSiteHTML(site),
+            });
+          });
+        }
       }
     })
     .catch(error => {
@@ -168,9 +196,11 @@ function fetchDataAndCreateMap(selectedStatuses, selectedGroups) {
     });
 }
 function addMarker(data) {
+  let url = !data.icon.includes('undefined') ? data.icon : `/static/geo_map/assets/icons/undefined.svg`;
+
   if (data.location.lat !== 0 && data.location.lng !== 0) {
     const image = {
-      url: data.icon,
+      url: url,
       scaledSize: new google.maps.Size(14, 14),
       origin: new google.maps.Point(0, 0),
       anchor: new google.maps.Point(7, 7),
@@ -323,6 +353,10 @@ function calculateCenter(data) {
   const sumLng = data.reduce((sum, site) => sum + site.longitude, 0);
   const averageLat = sumLat / totalSites;
   const averageLng = sumLng / totalSites;
+
+  if (isNaN(averageLat) || isNaN(averageLng)) {
+    return { lat: 28.6139, lng: 77.2090 };
+  }
   return { lat: averageLat, lng: averageLng };
 }
 window.initMap = initMap

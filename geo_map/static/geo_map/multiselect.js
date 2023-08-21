@@ -90,15 +90,14 @@ function MultiselectDropdown(options) {
       div.refresh = () => {
         div.querySelectorAll('span.optext, span.placeholder').forEach(t => div.removeChild(t));
         let sels = Array.from(el.selectedOptions);
-        if (sels.length > 2) {
+        if (sels.length > 1) {
           div.appendChild(newEl('span', { class: ['optext', 'maxselected'], text: sels.length + ' ' + config.txtSelected }));
         }
         else {
-
           sels.map(x => {
             let c = newEl('span', { class: 'optext', text: x.text, srcOption: x });
             if ((el.attributes['multiselect-hide-x']?.value !== 'true'))
-              c.appendChild(newEl('span', { class: 'optdel', text: '🗙', title: config.txtRemove, onclick: (ev) => { c.srcOption.listitemEl.dispatchEvent(new Event('click')); div.refresh(); ev.stopPropagation(); } }));
+              c.appendChild(newEl('span', { class: 'optdel', text: 'x', title: config.txtRemove, onclick: (ev) => { c.srcOption.listitemEl.dispatchEvent(new Event('click')); div.refresh(); ev.stopPropagation(); } }));
 
             div.appendChild(c);
           });
