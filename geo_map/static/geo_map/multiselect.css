@@ -79,6 +79,18 @@ span.placeholder:hover {
 
 .multiselect-dropdown-list-wrapper .multiselect-dropdown-search {
   margin-bottom: 5px;
+  border-radius: 0%;
+}
+
+.multiselect-dropdown-search:focus,
+.form-control:focus {
+  margin-bottom: 5px;
+  border-radius: 0%;
+  color: #212529;
+  background-color: #fff;
+  border-color: #999;
+  outline: 'none';
+  box-shadow: none;
 }
 
 .multiselect-dropdown-list {
