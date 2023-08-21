@@ -1,7 +1,1 @@
-<?xml version="1.0"?>
-<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
- <g class="layer">
-  <title>Layer 1</title>
-  <path d="m215.98,227.99l-175.96,0a28,28 0 0 1 -24.23,-42.02l87.98,-152l0,0a28,28 0 0 1 48.46,0l87.98,152a28,28 0 0 1 -24.23,42.02zm-91.44,-181.99l-87.98,151.99a4,4 0 0 0 3.46,6l175.96,0a4,4 0 0 0 3.46,-6l-87.98,-151.99a4,4 0 0 0 -6.92,0z" fill="#00ff00" id="svg_1"/>
- </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" zoomAndPan="magnify" viewBox="0 0 750 749.999995" height="1000" preserveAspectRatio="xMidYMid meet" version="1.0"><defs><clipPath id="511b1823a4"><path d="M 10 75 L 719 75 L 719 696.554688 L 10 696.554688 Z M 10 75 " clip-rule="nonzero"/></clipPath><clipPath id="151f40734a"><path d="M 3.367188 53.074219 L 746.617188 53.074219 L 746.617188 696.574219 L 3.367188 696.574219 Z M 3.367188 53.074219 " clip-rule="nonzero"/></clipPath></defs><g clip-path="url(#511b1823a4)"><path fill="#00bf63" d="M 14.132812 654.476562 L 340.265625 89.761719 C 351.035156 71.066406 377.953125 71.066406 388.71875 89.761719 L 714.851562 654.621094 C 725.617188 673.316406 712.160156 696.542969 690.625 696.542969 L 38.359375 696.542969 C 16.828125 696.402344 3.367188 673.175781 14.132812 654.476562 Z M 14.132812 654.476562 " fill-opacity="1" fill-rule="nonzero"/></g><g clip-path="url(#151f40734a)"><path fill="#000000" d="M 746.617188 696.480469 L 3.367188 696.480469 L 374.992188 53.167969 Z M 37.707031 676.71875 L 712.28125 676.71875 L 374.992188 92.835938 Z M 37.707031 676.71875 " fill-opacity="1" fill-rule="nonzero"/></g></svg>
