@@ -20,7 +20,7 @@ class GeoMapHomeView(PermissionRequiredMixin, View):
     """
 
     def get(self, request):
-        site_groups = SiteGroup.objects.all()
+        site_groups = SiteGroup.objects.filter(parent__isnull=True).order_by("name")
         tenants = (
             Tenant.objects.annotate(cable_count=Count("cables"))
             .filter(cable_count__gt=0)
