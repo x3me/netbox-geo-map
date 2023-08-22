@@ -3,7 +3,6 @@ let map
 let allSites = [];
 let allLinks = [];
 const displayedPolylines = [];
-
 const content = document.querySelector("#content")
 const mapContainer = document.querySelector('#map');
 function setMapHeight() {
@@ -26,16 +25,15 @@ function initMap() {
   let selectedStatuses = [];
   let selectedGroups = [];
 
-
   statusSelect.addEventListener('change', function () {
     selectedStatuses = Array.from(statusSelect.selectedOptions).map(option => option.value);
-    fetchDataAndCreateMap(selectedStatuses, selectedGroups);
+    fetchDataAndCreateMap(selectedStatuses, selectedGroups, selectedTenants, selectedLinkStatuses);
   });
 
   groupSelect.addEventListener('change', function () {
     selectedGroups = Array.from(groupSelect.selectedOptions).map(option => (option.value).toLowerCase());
     if (selectedGroups.length) {
-      fetchDataAndCreateMap(selectedStatuses, selectedGroups);
+      fetchDataAndCreateMap(selectedStatuses, selectedGroups, selectedTenants, selectedLinkStatuses);
     }
   });
 
@@ -48,7 +46,6 @@ function initMap() {
     selectedTenants = Array.from(tenantSelect.selectedOptions).map(option => option.value);
     if (selectedTenants.length) {
       fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
-
     }
   });
 
@@ -59,21 +56,7 @@ function initMap() {
 
   });
   actionsContent.addEventListener('click', function () {
-    // fetch('your-api-endpoint')
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         const dataBlob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    //         const dataURL = URL.createObjectURL(dataBlob);
-    //         const downloadLink = document.createElement('a');
-    //         downloadLink.href = dataURL;
-    //         downloadLink.download = 'data.json';
-    //         downloadLink.click();
-    //         URL.revokeObjectURL(dataURL);
-    //     })
-    //     .catch(error => {
-    //         console.error('Error fetching or exporting data:', error);
-    //     });
-    console.log('Export Pops KML');
+    exportKML();
     actionsContent.style.display = 'none';
     actions.disabled = false;
   });
@@ -83,13 +66,12 @@ function initMap() {
       actions.disabled = false;
     }
   });
-
-  fetchDataAndCreateMap(selectedStatuses, selectedGroups);
+  fetchDataAndCreateMap(selectedStatuses, selectedGroups, selectedTenants, selectedLinkStatuses);
 }
 
-function combineData(linksArray, sitesArray, selectedLinkStatuses, selectedTenants) {
-  clearDisplayedPolylines()
+function combineData(linksArray, sitesArray) {
   const combinedData = {};
+
   if (linksArray.length && sitesArray.length) {
     linksArray.forEach(connection => {
       const { id, status, terminations, color } = connection;
@@ -103,25 +85,33 @@ function combineData(linksArray, sitesArray, selectedLinkStatuses, selectedTenan
       };
       combinedData[id] = combinedObject;
     });
-    if (!selectedTenants.length || !selectedLinkStatuses.length) {
-      console.log('No Chosen Vendor or Fiber Links Status!')
-    } else if (selectedLinkStatuses.length && selectedTenants.length) {
-      clearDisplayedPolylines()
-      for (const id in combinedData) {
-        if (combinedData.hasOwnProperty(id)) {
-          const connection = combinedData[id];
-          const { terminations } = connection;
-          if (terminations.length > 1 && connection.status && selectedLinkStatuses.includes(connection.status) && selectedLinkStatuses.length && selectedLinkStatuses.includes(connection.status)) {
-            drawPolyline(terminations, connection)
-          }
-          terminations.forEach(termination => {
-            addMarker({
-              location: { lat: termination.latitude, lng: termination.longitude },
-              icon: `/static/geo_map/assets/icons/${termination.group}_${termination.status}.svg`,
-              content: generateSiteHTML(termination),
-            });
-          });
+
+    return combinedData;
+  }
+
+  return null;
+}
+function visualizeCombinedData(combinedData, selectedLinkStatuses, selectedTenants) {
+  clearDisplayedPolylines();
+
+ if (selectedLinkStatuses.length && selectedTenants.length) {
+    clearDisplayedPolylines();
+    for (const id in combinedData) {
+      if (combinedData.hasOwnProperty(id)) {
+        const connection = combinedData[id];
+        const { terminations } = connection;
+
+        if (terminations.length > 1 && connection.status && selectedLinkStatuses.includes(connection.status)) {
+          drawPolyline(terminations, connection);
         }
+
+        terminations.forEach(termination => {
+          addMarker({
+            location: { lat: termination.latitude, lng: termination.longitude },
+            icon: `/static/geo_map/assets/icons/${termination.group}_${termination.status}.svg`,
+            content: generateSiteHTML(termination),
+          });
+        });
       }
     }
   }
@@ -136,13 +126,14 @@ function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
     .then(response => response.json())
     .then(data => {
       allLinks = JSON.parse(JSON.stringify(data))
-      combineData(allLinks, allSites, selectedLinkStatuses, selectedTenants);
+      let combinedData = combineData(allLinks, allSites);
+      visualizeCombinedData(combinedData, selectedLinkStatuses, selectedTenants)
     })
     .catch(error => {
       console.error('Error fetching site data:', error);
     });
 }
-function fetchDataAndCreateMap(selectedStatuses, selectedGroups) {
+function fetchDataAndCreateMap(selectedStatuses, selectedGroups, selectedTenants, selectedLinkStatuses) {
   let group_params = selectedGroups.length ? `&?group__in=${selectedGroups.join(',')}` : ''
   const API_CALL = selectedStatuses.length ?
     `/api/plugins/geo_map/sites/?status__in=${selectedStatuses.join(',')}${group_params}`
@@ -158,7 +149,10 @@ function fetchDataAndCreateMap(selectedStatuses, selectedGroups) {
         zoom: 7,
       };
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
+      if (selectedTenants && selectedLinkStatuses) {
+        let combinedData = combineData(allLinks, allSites);
+        visualizeCombinedData(combinedData, selectedLinkStatuses, selectedTenants)
+      }
       if (!selectedStatuses.length && !selectedGroups.length) {
         data.forEach(site => {
           if (site.group === 'pit') {
@@ -190,6 +184,7 @@ function fetchDataAndCreateMap(selectedStatuses, selectedGroups) {
           });
         }
       }
+      // if()
     })
     .catch(error => {
       console.error('Error fetching site data:', error);
