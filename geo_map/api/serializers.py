@@ -17,6 +17,7 @@ class SiteSerializer(NetBoxModelSerializer):
             "group",
             "latitude",
             "longitude",
+            "physical_address",
         )
 
 

@@ -40,7 +40,7 @@ class CableFilter(filters.FilterSet):
 class SiteViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
     permission_required = "dcim.view_site"
 
-    queryset = Site.objects.exclude(latitude__isnull=True)
+    queryset = Site.objects.exclude(latitude__isnull=True).prefetch_related("group")
     serializer_class = SiteSerializer
     filterset_class = SiteFilter
 
