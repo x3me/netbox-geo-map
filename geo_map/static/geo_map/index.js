@@ -110,7 +110,6 @@ function combineData(linksArray, sitesArray) {
     };
     combinedData[id] = combinedObject;
   });
-  console.log(combinedData)
   return combinedData;
 }
 function visualizeCombinedData(
@@ -142,8 +141,10 @@ function visualizeCombinedData(
 }
 
 function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
- const LINKS_API_CALL = `/api/plugins/geo_map/links/?tenant__in=${selectedTenants.join(",")}`;
- // const LINKS_API_CALL = `/api/plugins/geo_map/links/`;
+  const LINKS_API_CALL =
+    tenantSelect.children.length !== selectedTenants.length
+      ? `/api/plugins/geo_map/links/?tenant__in=${selectedTenants.join(",")}`
+      : `/api/plugins/geo_map/links/`;
 
   fetch(LINKS_API_CALL)
     .then((response) => response.json())
@@ -232,28 +233,28 @@ function addMarker(data) {
   const url = !data.icon.includes("undefined")
     ? data.icon
     : `/static/geo_map/assets/icons/undefined.svg`;
-
-  if (data.location.lat !== 0 && data.location.lng !== 0) {
-    const image = {
-      url: url,
-      scaledSize: new google.maps.Size(14, 14),
-      origin: new google.maps.Point(0, 0),
-      anchor: new google.maps.Point(7, 7),
-    };
-    const marker = new google.maps.Marker({
-      position: data.location,
-      map: map,
-      icon: image,
+  if (data.location.lat === 0 || data.location.lng === 0) return;
+  // if (data.location.lat !== 0 && data.location.lng !== 0) {
+  const image = {
+    url: url,
+    scaledSize: new google.maps.Size(14, 14),
+    origin: new google.maps.Point(0, 0),
+    anchor: new google.maps.Point(7, 7),
+  };
+  const marker = new google.maps.Marker({
+    position: data.location,
+    map: map,
+    icon: image,
+  });
+  if (data.content) {
+    const infoWindow = new google.maps.InfoWindow({
+      content: data.content,
     });
-    if (data.content) {
-      const infoWindow = new google.maps.InfoWindow({
-        content: data.content,
-      });
-      marker.addListener("click", () => {
-        infoWindow.open(map, marker);
-      });
-    }
+    marker.addListener("click", () => {
+      infoWindow.open(map, marker);
+    });
   }
+  //}
 }
 function generateSiteHTML(site) {
   return "<a href=" + site.url + ">" + site.name + "</a>";
