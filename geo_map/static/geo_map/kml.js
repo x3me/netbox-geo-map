@@ -8,7 +8,7 @@ function generateKML(locations) {
     return `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>${placemarks.join('')}</Document></kml>`;
 }
 
-function exportKML() {
+function exportKML(allSites) {
     const kmlContent = generateKML(allSites);
     const blob = new Blob([kmlContent], { type: 'application/vnd.google-earth.kml+xml' });
     const blobUrl = URL.createObjectURL(blob);
@@ -17,4 +17,5 @@ function exportKML() {
     downloadLink.download = 'pops.kml';
     downloadLink.click();
     URL.revokeObjectURL(blobUrl);
+    downloadLink.remove();
   }
