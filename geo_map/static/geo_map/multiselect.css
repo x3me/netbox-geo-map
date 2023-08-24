@@ -7,7 +7,7 @@
   position: relative;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right .75rem center;
+  background-position: right 0.75rem center;
   background-size: 16px 12px;
   max-width: 300px;
   min-width: 200px;
@@ -18,7 +18,6 @@
 .multiselect-dropdown:hover {
   background-color: #f1ebeb;
   box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
-
 }
 
 span.placeholder:hover {
@@ -80,17 +79,17 @@ span.placeholder:hover {
 .multiselect-dropdown-list-wrapper .multiselect-dropdown-search {
   margin-bottom: 5px;
   border-radius: 0%;
+  background-color: #fff !important;
 }
 
 .multiselect-dropdown-search:focus,
 .form-control:focus {
   margin-bottom: 5px;
-  border-radius: 0%;
-  color: #212529;
+  border-radius: 0% !important;
+  color: #212529 !important;
   background-color: #fff;
-  border-color: #999;
-  outline: 'none';
-  box-shadow: none;
+  border-color: #999 !important;
+  box-shadow: none !important;
 }
 
 .multiselect-dropdown-list {
@@ -112,19 +111,25 @@ span.placeholder:hover {
   padding: 5px;
   display: flex;
   align-items: baseline;
+  color: rgb(86, 86, 86);
+  gap: 0.35em;
+  font-size: 16px;
 }
 
 .multiselect-dropdown-list input {
   width: 14px;
   border-radius: 0;
-  margin-right: 0.35em;
   flex-shrink: 0;
+  margin-right: 0.35em;
 }
 
-.multiselect-dropdown-list input[type=checkbox]:checked {
+.multiselect-dropdown-list input[type="checkbox"]:checked {
   accent-color: black;
+  background-color: #bec4ca;
 }
-
+input[type="checkbox"] {
+  color-scheme: light !important;
+}
 .multiselect-dropdown-list div:hover {
   background-color: #f1ebeb;
 }
