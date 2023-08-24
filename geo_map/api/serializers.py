@@ -57,7 +57,7 @@ class CircuitSerializer(NetBoxModelSerializer):
     color = serializers.CharField(allow_blank=True, allow_null=True)
 
     def get_color(self, obj: Circuit):
-        return obj.vendor.custom_fields.get("color") if obj.vendor else None
+        return obj.provider.cf.get("color") if obj.provider else None
 
     class Meta:
         model = Circuit

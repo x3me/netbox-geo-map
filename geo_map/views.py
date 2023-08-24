@@ -21,11 +21,12 @@ class GeoMapHomeView(PermissionRequiredMixin, View):
 
     def get(self, request):
         site_groups = SiteGroup.objects.filter(parent__isnull=True).order_by("name")
-        providers = (
+        providers: list[Provider] = (
             Provider.objects.annotate(circuit_count=Count("circuits"))
             .filter(circuit_count__gt=0)
             .order_by("name")
         )
+
         return render(
             request,
             "index.html",
@@ -46,7 +47,7 @@ class GeoMapHomeView(PermissionRequiredMixin, View):
                     {
                         "value": provider.id,
                         "label": provider.name,
-                        "color": provider.custom_fields.get("color"),
+                        "color": provider.cf.get("color"),
                     }
                     for provider in providers
                 ],
