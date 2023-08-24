@@ -43,7 +43,11 @@ class GeoMapHomeView(PermissionRequiredMixin, View):
                     for status in LinkStatusChoices
                 ],
                 "providers": [
-                    {"value": provider.id, "label": provider.name}
+                    {
+                        "value": provider.id,
+                        "label": provider.name,
+                        "color": provider.custom_fields.get("color"),
+                    }
                     for provider in providers
                 ],
             },
