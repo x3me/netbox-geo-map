@@ -10,7 +10,7 @@ menu = PluginMenu(
                 PluginMenuItem(
                     link="plugins:geo_map:home",
                     link_text="Map",
-                    permissions=["dcim.view_site", "dcim.view_cable"],
+                    permissions=["dcim.view_site", "circuits.view_circuit"],
                 ),
             ),
         ),

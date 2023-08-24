@@ -11,7 +11,7 @@ setMapHeight();
 window.addEventListener("resize", setMapHeight);
 
 function initMap() {
-  const tenantSelect = document.getElementById("tenantSelect");
+  const providerSelect = document.getElementById("providerSelect");
   const linkStatusSelect = document.getElementById("fiberLinkStatus");
   const statusSelect = document.getElementById("statusSelect");
   const groupSelect = document.getElementById("groupSelect");
@@ -58,8 +58,8 @@ function initMap() {
     fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
   });
 
-  tenantSelect.addEventListener("change", function () {
-    selectedTenants = Array.from(tenantSelect.selectedOptions).map(
+  providerSelect.addEventListener("change", function () {
+    selectedTenants = Array.from(providerSelect.selectedOptions).map(
       (option) => option.value
     );
     if (!selectedTenants.length) {
@@ -142,7 +142,7 @@ function visualizeCombinedData(
 
 function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
   const LINKS_API_CALL =
-    tenantSelect.children.length !== selectedTenants.length
+    providerSelect.children.length !== selectedTenants.length
       ? `/api/plugins/geo_map/links/?tenant__in=${selectedTenants.join(",")}`
       : `/api/plugins/geo_map/links/`;
 
