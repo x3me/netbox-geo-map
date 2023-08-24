@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content-wrapper %}
-<div style="position: relative;">
+<div style="position: relative; display: none;" id="container">
     <div style="display: flex; flex-direction:row;position: absolute; left: 178px; z-index:3; margin-top: 10px;">
         <select name="providerSelect" id="providerSelect" multiple multiselect-search="true"
             multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Vendor">
@@ -42,11 +42,15 @@
             </div>
         </div>
     </div>
-
     <div id="map" style="height: 200px; width: 100%; position: relative;"></div>
 </div>
-{% endblock %}
+<div id="loader" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
+    <div class="spinner-border text-primary" role="status" style="width: 5em; height: 5em;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
 
+</div>
+{% endblock %}
 {% block javascript %}
 <script async src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap"></script>
 <script src="{% static 'geo_map/kml.js' %}"></script>

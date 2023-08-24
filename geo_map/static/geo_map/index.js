@@ -5,6 +5,15 @@ const displayedPolylines = [];
 const content = document.querySelector("#content");
 const mapContainer = document.querySelector("#map");
 const baseURL = window.location.origin;
+
+const loader = document.getElementById("loader");
+loader.style.display = "block";
+setTimeout(() => {
+  loader.style.display = "none";
+  const container = document.getElementById("container");
+  container.style.display = "block";
+}, 2000);
+
 function setMapHeight() {
   mapContainer.style.height = content.clientHeight + "px";
 }
@@ -136,13 +145,12 @@ function visualizeCombinedData(
 
 function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
   const LINKS_API_CALL = new URL(baseURL + "/api/plugins/geo_map/links/");
-  let searchParams = LINKS_API_CALL.searchParams;
   if (selectedTenants.length !== providerSelect.children.length) {
-    searchParams.set("tenant__in", selectedTenants.join(","));
-    LINKS_API_CALL.search = searchParams.toString();
+    LINKS_API_CALL.searchParams.set("tenant__in", selectedTenants.join(","));
+    LINKS_API_CALL.search = LINKS_API_CALL.searchParams.toString();
   }
-  searchParams.set("status__in", selectedLinkStatuses.join(","));
-  LINKS_API_CALL.search = searchParams.toString();
+  LINKS_API_CALL.searchParams.set("status__in", selectedLinkStatuses.join(","));
+  LINKS_API_CALL.search = LINKS_API_CALL.searchParams.toString();
 
   fetch(LINKS_API_CALL)
     .then((response) => response.json())
@@ -168,14 +176,12 @@ function fetchDataAndCreateMap(
 ) {
   const API_CALL = new URL(baseURL + "/api/plugins/geo_map/sites/");
   if (selectedStatuses.length) {
-    let searchParams = API_CALL.searchParams;
-    searchParams.set("status__in", selectedStatuses.join(","));
-    API_CALL.search = searchParams.toString();
+    API_CALL.searchParams.set("status__in", selectedStatuses.join(","));
+    API_CALL.search = API_CALL.searchParams.toString();
   }
   if (selectedGroups.length && selectedStatuses.length) {
-    let searchParams = API_CALL.searchParams;
-    searchParams.set("?group__in", selectedGroups.join(","));
-    API_CALL.search = searchParams.toString();
+    API_CALL.searchParams.set("?group__in", selectedGroups.join(","));
+    API_CALL.search = API_CALL.searchParams.toString();
   }
 
   fetch(API_CALL)
