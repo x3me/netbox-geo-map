@@ -6,8 +6,7 @@ from django.db.models import Count
 from django.shortcuts import render
 from django.views import View
 from circuits.models import Provider
-from dcim.choices import LinkStatusChoices
-
+from circuits.choices import CircuitStatusChoices
 
 CONFIG = settings.PLUGINS_CONFIG["geo_map"]
 
@@ -41,7 +40,7 @@ class GeoMapHomeView(PermissionRequiredMixin, View):
                 ],
                 "link_statuses": [
                     {"value": status[0], "label": status[1]}
-                    for status in LinkStatusChoices
+                    for status in CircuitStatusChoices
                 ],
                 "providers": [
                     {

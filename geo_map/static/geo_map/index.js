@@ -4,6 +4,7 @@ let allLinks = [];
 const displayedPolylines = [];
 const content = document.querySelector("#content");
 const mapContainer = document.querySelector("#map");
+const baseURL = window.location.origin;
 function setMapHeight() {
   mapContainer.style.height = content.clientHeight + "px";
 }
@@ -97,8 +98,9 @@ function combineData(linksArray, sitesArray) {
   const combinedData = {};
   if (!linksArray.length || !sitesArray.length) return null;
   linksArray.forEach((connection) => {
-    const { id, status, terminations, color } = connection;
-    const connectedSites = terminations.map((termination) => termination.site);
+    const { id, status, termination_a_site, termination_z_site, color } =
+      connection;
+    const connectedSites = [termination_a_site, termination_z_site];
     const siteDetails = sitesArray.filter((site) =>
       connectedSites.includes(site.id)
     );
@@ -122,7 +124,6 @@ function visualizeCombinedData(
   for (const id in combinedData) {
     const connection = combinedData[id];
     const { terminations } = connection;
-
     if (
       terminations.length > 1 &&
       connection.status &&
@@ -130,21 +131,18 @@ function visualizeCombinedData(
     ) {
       drawPolyline(terminations, connection);
     }
-    terminations.forEach((termination) => {
-      addMarker({
-        location: { lat: termination.latitude, lng: termination.longitude },
-        icon: `/static/geo_map/assets/icons/${termination.group}_${termination.status}.svg`,
-        content: generateSiteHTML(termination),
-      });
-    });
   }
 }
 
 function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
-  const LINKS_API_CALL =
-    providerSelect.children.length !== selectedTenants.length
-      ? `/api/plugins/geo_map/links/?tenant__in=${selectedTenants.join(",")}`
-      : `/api/plugins/geo_map/links/`;
+  const LINKS_API_CALL = new URL(baseURL + "/api/plugins/geo_map/links/");
+  let searchParams = LINKS_API_CALL.searchParams;
+  if (selectedTenants.length !== providerSelect.children.length) {
+    searchParams.set("tenant__in", selectedTenants.join(","));
+    LINKS_API_CALL.search = searchParams.toString();
+  }
+  searchParams.set("status__in", selectedLinkStatuses.join(","));
+  LINKS_API_CALL.search = searchParams.toString();
 
   fetch(LINKS_API_CALL)
     .then((response) => response.json())
@@ -168,14 +166,17 @@ function fetchDataAndCreateMap(
   selectedTenants,
   selectedLinkStatuses
 ) {
-  const group_params = selectedGroups.length
-    ? `&?group__in=${selectedGroups.join(",")}`
-    : "";
-  const API_CALL = selectedStatuses.length
-    ? `/api/plugins/geo_map/sites/?status__in=${selectedStatuses.join(
-        ","
-      )}${group_params}`
-    : `/api/plugins/geo_map/sites/`;
+  const API_CALL = new URL(baseURL + "/api/plugins/geo_map/sites/");
+  if (selectedStatuses.length) {
+    let searchParams = API_CALL.searchParams;
+    searchParams.set("status__in", selectedStatuses.join(","));
+    API_CALL.search = searchParams.toString();
+  }
+  if (selectedGroups.length && selectedStatuses.length) {
+    let searchParams = API_CALL.searchParams;
+    searchParams.set("?group__in", selectedGroups.join(","));
+    API_CALL.search = searchParams.toString();
+  }
 
   fetch(API_CALL)
     .then((response) => response.json())
@@ -230,13 +231,9 @@ function fetchDataAndCreateMap(
     });
 }
 function addMarker(data) {
-  const url = !data.icon.includes("undefined")
-    ? data.icon
-    : `/static/geo_map/assets/icons/undefined.svg`;
   if (data.location.lat === 0 || data.location.lng === 0) return;
-  // if (data.location.lat !== 0 && data.location.lng !== 0) {
   const image = {
-    url: url,
+    url: data.icon,
     scaledSize: new google.maps.Size(14, 14),
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(7, 7),
@@ -254,7 +251,6 @@ function addMarker(data) {
       infoWindow.open(map, marker);
     });
   }
-  //}
 }
 function generateSiteHTML(site) {
   return "<a href=" + site.url + ">" + site.name + "</a>";
@@ -317,7 +313,7 @@ function drawPolyline(terminations, connection) {
         repeat: "30px",
       },
     ],
-    decommissioning: [
+    decommissioned: [
       {
         //twodash
         icon: {
@@ -379,23 +375,16 @@ function drawPolyline(terminations, connection) {
       },
     ],
   };
-  let status;
   const paths = terminations.map((t) => {
     if (t.latitude === 0 || t.longitude === 0) return null;
-    addMarker({
-      location: { lat: t.latitude, lng: t.longitude },
-      icon: `/static/geo_map/assets/icons/${t.group}_${t.status}.svg`,
-      content: generateSiteHTML(t),
-    });
-    status = t.status;
     return { lat: t.latitude, lng: t.longitude };
   });
-  if (status && !paths.includes(null)) {
+  if (connection.status && !paths.includes(null)) {
     const polyline = new google.maps.Polyline({
       path: paths,
       geodesic: true,
       strokeOpacity: 0,
-      icons: [...lineSymbolPath[status]],
+      icons: [...lineSymbolPath[connection.status]],
     });
     polyline.setMap(map);
     displayedPolylines.push(polyline);
