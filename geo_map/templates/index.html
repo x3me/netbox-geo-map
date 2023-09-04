@@ -29,12 +29,12 @@
         </select>
         <select name="groupSelect" id="groupSelect" multiple multiselect-search="true" multiselect-select-all="true"
             multiselect-max-items="3" placeholder="POP Groups">
-            {% for group in site_groups %}
-            <option value="{{group.label}}" {% if group.label=="Pit" %} selected class="checked" {% endif %}>
-                {{group.label}}
-            </option>
-            {% endfor %}
-        </select>
+        {% for group in site_groups %}
+        <option value="{{group.label}}" {% if group.label == "Pit" %} selected class="checked" {% endif %}>
+            {{group.label}}
+        </option>
+        {% endfor %}
+    </select>
         <div style="display: flex; flex-direction: column;">
             <button id="actions">
                 Actions
