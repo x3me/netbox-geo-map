@@ -1,30 +1,54 @@
+from dcim.choices import SiteStatusChoices
+from dcim.models import SiteGroup
+from django.conf import settings
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db.models import Count
 from django.shortcuts import render
-from dcim.models import *
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.views import View
+from circuits.models import Provider
+from circuits.choices import CircuitStatusChoices
+
+CONFIG = settings.PLUGINS_CONFIG["geo_map"]
 
 
-@login_required
-def google_map(request):
-    return render(request, "index.html")
+class GeoMapHomeView(PermissionRequiredMixin, View):
+    permission_required = ("dcim.view_site", "circuits.view_circuit")
 
+    """
+    Show the home page
+    """
 
-@login_required
-def get_sites(request):
-    _sites = Site.objects.exclude(latitude__isnull=True).values(
-        "_name", "latitude", "longitude", "status", "group__name"
-    )
-    site_info_list = []
-    for _site in _sites:
-        site_info_list.append(
-            {
-                "title": _site["_name"],
-                "position": {
-                    "lat": float(_site["latitude"]),
-                    "lng": float(_site["longitude"]),
-                },
-                "status": _site["status"],
-                "group": _site["group__name"],
-            }
+    def get(self, request):
+        site_groups = SiteGroup.objects.filter(parent__isnull=True).order_by("name")
+        providers: list[Provider] = (
+            Provider.objects.annotate(circuit_count=Count("circuits"))
+            .filter(circuit_count__gt=0)
+            .order_by("name")
         )
-    return JsonResponse(site_info_list, safe=False)
+
+        return render(
+            request,
+            "index.html",
+            {
+                "google_maps_key": CONFIG["google_maps_key"],
+                "site_statuses": [
+                    {"value": status[0], "label": status[1]}
+                    for status in SiteStatusChoices.CHOICES
+                ],
+                "site_groups": [
+                    {"value": group.id, "label": group.name} for group in site_groups
+                ],
+                "link_statuses": [
+                    {"value": status[0], "label": status[1]}
+                    for status in CircuitStatusChoices
+                ],
+                "providers": [
+                    {
+                        "value": provider.id,
+                        "label": provider.name,
+                        "color": provider.cf.get("color"),
+                    }
+                    for provider in providers
+                ],
+            },
+        )

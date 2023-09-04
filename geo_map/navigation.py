@@ -1,8 +1,18 @@
-from extras.plugins import PluginMenuItem
+from extras.plugins import PluginMenu, PluginMenuItem
 
-menu_items = (
-    PluginMenuItem(
-        link="plugins:geo_map:google_map",
-        link_text="Geological Map",
+menu = PluginMenu(
+    label="Site Map",
+    icon_class="mdi mdi-map",
+    groups=(
+        (
+            "Geo Map",
+            (
+                PluginMenuItem(
+                    link="plugins:geo_map:home",
+                    link_text="Map",
+                    permissions=["dcim.view_site", "circuits.view_circuit"],
+                ),
+            ),
+        ),
     ),
 )
