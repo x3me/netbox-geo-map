@@ -1,0 +1,5 @@
+include README.md
+exclude .gitignore
+global-exclude *.pyc
+recursive-include geo_map/templates *
+recursive-include geo_map/static *
