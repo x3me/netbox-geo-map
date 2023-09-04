@@ -318,7 +318,7 @@ function drawPolyline(terminations, connection) {
         icon: {
           path: "M 0,-5 0,5",
           strokeOpacity: 1,
-          scale: 2,
+          scale: 1,
           strokeWeight: 1,
           strokeColor: connection.color,
         },
@@ -333,11 +333,11 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: connection.color,
         },
         offset: "0",
-        repeat: "20px",
+        repeat: "15px",
       },
       {
         icon: {
@@ -348,18 +348,7 @@ function drawPolyline(terminations, connection) {
           strokeColor: connection.color,
         },
         offset: "0",
-        repeat: "10px",
-      },
-      {
-        icon: {
-          path: "M 0,3 0,2",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 1,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "20px",
+        repeat: "15px",
       },
     ],
     deprovisioning: [
