@@ -30,7 +30,9 @@
         <select name="groupSelect" id="groupSelect" multiple multiselect-search="true" multiselect-select-all="true"
             multiselect-max-items="3" placeholder="POP Groups">
             {% for group in site_groups %}
-            <option value="{{group.label}}">{{group.label}}</option>
+            <option value="{{group.label}}" {% if group.label=="Pit" %} selected class="checked" {% endif %}>
+                {{group.label}}
+            </option>
             {% endfor %}
         </select>
         <div style="display: flex; flex-direction: column;">
@@ -44,7 +46,7 @@
     </div>
     <div id="map" style="height: 200px; width: 100%; position: relative;"></div>
 </div>
-<div id="loader" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
+<div id="loader" class="position-absolute top-50 start-50 translate-middle d-block">
     <div class="spinner-border text-primary" role="status" style="width: 5em; height: 5em;">
         <span class="visually-hidden">Loading...</span>
     </div>

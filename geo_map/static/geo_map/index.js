@@ -1,18 +1,13 @@
 let map;
+let zoom;
 let allSites = [];
 let allLinks = [];
 const displayedPolylines = [];
 const content = document.querySelector("#content");
 const mapContainer = document.querySelector("#map");
 const baseURL = window.location.origin;
-
 const loader = document.getElementById("loader");
-loader.style.display = "block";
-setTimeout(() => {
-  loader.style.display = "none";
-  const container = document.getElementById("container");
-  container.style.display = "block";
-}, 2000);
+const container = document.getElementById("container");
 
 function setMapHeight() {
   mapContainer.style.height = content.clientHeight + "px";
@@ -25,13 +20,14 @@ function initMap() {
   const linkStatusSelect = document.getElementById("fiberLinkStatus");
   const statusSelect = document.getElementById("statusSelect");
   const groupSelect = document.getElementById("groupSelect");
+
   const actions = document.getElementById("actions");
   const actionsContent = document.getElementById("actions-content");
 
   let selectedTenants = [];
   let selectedLinkStatuses = [];
   let selectedStatuses = [];
-  let selectedGroups = [];
+  let selectedGroups = ["pit"];
 
   statusSelect.addEventListener("change", function () {
     selectedStatuses = Array.from(statusSelect.selectedOptions).map(
@@ -109,10 +105,10 @@ function combineData(linksArray, sitesArray) {
   linksArray.forEach((connection) => {
     const { id, status, termination_a_site, termination_z_site, color } =
       connection;
-    const connectedSites = [termination_a_site, termination_z_site];
-    const siteDetails = sitesArray.filter((site) =>
-      connectedSites.includes(site.id)
+    const siteDetails = sitesArray.filter(
+      (site) => termination_a_site === site.id || termination_z_site === site.id
     );
+    if (siteDetails.length < 2) return;
     const combinedObject = {
       id,
       status,
@@ -194,6 +190,7 @@ function fetchDataAndCreateMap(
         zoom: 7,
       };
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      zoom = map.getZoom();
       if (selectedTenants && selectedLinkStatuses) {
         const combinedData = combineData(allLinks, allSites);
         visualizeCombinedData(
@@ -202,9 +199,22 @@ function fetchDataAndCreateMap(
           selectedTenants
         );
       }
-      if (!selectedStatuses.length && !selectedGroups.length) {
+      if (selectedStatuses.length && selectedGroups.length) {
         data.forEach((site) => {
-          if (site.group === "pit") {
+          if (
+            selectedGroups.includes(site.group) &&
+            selectedStatuses.includes(site.status)
+          ) {
+            addMarker({
+              location: { lat: site.latitude, lng: site.longitude },
+              icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
+              content: generateSiteHTML(site),
+            });
+          }
+        });
+      } else if (selectedStatuses.length) {
+        data.forEach((site) => {
+          if (selectedStatuses.includes(site.status)) {
             addMarker({
               location: { lat: site.latitude, lng: site.longitude },
               icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
@@ -222,25 +232,21 @@ function fetchDataAndCreateMap(
             });
           }
         });
-      } else {
-        data.forEach((site) => {
-          addMarker({
-            location: { lat: site.latitude, lng: site.longitude },
-            icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
-            content: generateSiteHTML(site),
-          });
-        });
       }
     })
     .catch((error) => {
       console.error("Error fetching site data:", error);
+    })
+    .finally(() => {
+      loader.classList.add("d-none");
+      container.style.display = "block";
     });
 }
 function addMarker(data) {
   if (data.location.lat === 0 || data.location.lng === 0) return;
   const image = {
     url: data.icon,
-    scaledSize: new google.maps.Size(14, 14),
+    scaledSize: new google.maps.Size(10, 10),
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(7, 7),
   };
@@ -248,6 +254,7 @@ function addMarker(data) {
     position: data.location,
     map: map,
     icon: image,
+    optimized: true,
   });
   if (data.content) {
     const infoWindow = new google.maps.InfoWindow({
@@ -270,7 +277,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,1 0,-1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -284,7 +291,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -298,7 +305,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -312,7 +319,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-5 0,5",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -337,7 +344,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -348,7 +355,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -362,7 +369,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -373,7 +380,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 1,
           strokeColor: connection.color,
         },
         offset: "0",
