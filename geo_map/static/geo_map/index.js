@@ -29,51 +29,62 @@ function initMap() {
   let selectedStatuses = [];
   let selectedGroups = ["pit"];
 
-  statusSelect.addEventListener("change", function () {
-    selectedStatuses = Array.from(statusSelect.selectedOptions).map(
-      (option) => option.value
-    );
-    fetchDataAndCreateMap(
-      selectedStatuses,
-      selectedGroups,
-      selectedTenants,
-      selectedLinkStatuses
-    );
-  });
+  statusSelect.addEventListener(
+    "change",
+    debounce(function () {
+      selectedStatuses = Array.from(statusSelect.selectedOptions).map(
+        (option) => option.value
+      );
+      fetchDataAndCreateMap(
+        selectedStatuses,
+        selectedGroups,
+        selectedTenants,
+        selectedLinkStatuses
+      );
+    }, 1000)
+  );
+  groupSelect.addEventListener(
+    "change",
+    debounce(function () {
+      selectedGroups = Array.from(groupSelect.selectedOptions).map((option) =>
+        option.value.toLowerCase()
+      );
+      fetchDataAndCreateMap(
+        selectedStatuses,
+        selectedGroups,
+        selectedTenants,
+        selectedLinkStatuses
+      );
+    }, 1000)
+  );
 
-  groupSelect.addEventListener("change", function () {
-    selectedGroups = Array.from(groupSelect.selectedOptions).map((option) =>
-      option.value.toLowerCase()
-    );
-    fetchDataAndCreateMap(
-      selectedStatuses,
-      selectedGroups,
-      selectedTenants,
-      selectedLinkStatuses
-    );
-  });
+  linkStatusSelect.addEventListener(
+    "change",
+    debounce(function () {
+      selectedLinkStatuses = Array.from(linkStatusSelect.selectedOptions).map(
+        (option) => option.value
+      );
+      if (!selectedLinkStatuses.length) {
+        clearDisplayedPolylines();
+        return;
+      }
+      fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
+    }, 1000)
+  );
 
-  linkStatusSelect.addEventListener("change", function () {
-    selectedLinkStatuses = Array.from(linkStatusSelect.selectedOptions).map(
-      (option) => option.value
-    );
-    if (!selectedLinkStatuses.length) {
-      clearDisplayedPolylines();
-      return;
-    }
-    fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
-  });
-
-  providerSelect.addEventListener("change", function () {
-    selectedTenants = Array.from(providerSelect.selectedOptions).map(
-      (option) => option.value
-    );
-    if (!selectedTenants.length) {
-      clearDisplayedPolylines();
-      return;
-    }
-    fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
-  });
+  providerSelect.addEventListener(
+    "change",
+    debounce(function () {
+      selectedTenants = Array.from(providerSelect.selectedOptions).map(
+        (option) => option.value
+      );
+      if (!selectedTenants.length) {
+        clearDisplayedPolylines();
+        return;
+      }
+      fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
+    }, 1000)
+  );
 
   actions.addEventListener("click", function (event) {
     actionsContent.style.display = "block";
@@ -410,5 +421,16 @@ function calculateCenter(data) {
     return { lat: 28.6139, lng: 77.209 };
   }
   return { lat: averageLat, lng: averageLng };
+}
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      timeout = null;
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
 }
 window.initMap = initMap;

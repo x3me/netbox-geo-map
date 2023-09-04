@@ -28,13 +28,6 @@ function MultiselectDropdown(options) {
       });
     return e;
   }
-  function debounce(func, delay) {
-    let timer;
-    return function (...args) {
-      clearTimeout(timer);
-      timer = setTimeout(() => func.apply(this, args), delay);
-    };
-  }
   document.querySelectorAll("select[multiple]").forEach((el, k) => {
     let div = newEl("div", {
       class: "multiselect-dropdown",
@@ -75,12 +68,10 @@ function MultiselectDropdown(options) {
         let ic = newEl("input", { type: "checkbox" });
         op.appendChild(ic);
         op.appendChild(newEl("label", { text: config.txtAll }));
-
         op.addEventListener("click", () => {
           op.classList.toggle("checked");
           op.querySelector("input").checked =
             !op.querySelector("input").checked;
-
           let ch = op.querySelector("input").checked;
           list
             .querySelectorAll(
@@ -120,7 +111,6 @@ function MultiselectDropdown(options) {
         let ic = newEl("input", { type: "checkbox", checked: o.selected });
         op.appendChild(ic);
         op.appendChild(newEl("label", { text: o.text }));
-
         op.addEventListener("click", () => {
           op.classList.toggle("checked");
           op.querySelector("input").checked =
@@ -168,7 +158,6 @@ function MultiselectDropdown(options) {
                   },
                 })
               );
-
             div.appendChild(c);
           });
         }
@@ -183,7 +172,8 @@ function MultiselectDropdown(options) {
       div.refresh();
     };
     el.loadOptions();
-    const debouncedSearch = debounce(() => {
+
+    search.addEventListener("input", () => {
       list
         .querySelectorAll(":scope div:not(.multiselect-dropdown-all-selector)")
         .forEach((d) => {
@@ -192,10 +182,7 @@ function MultiselectDropdown(options) {
             ? "block"
             : "none";
         });
-    }, 300);
-
-    search.addEventListener("input", debouncedSearch);
-
+    });
     div.addEventListener("click", () => {
       div.listEl.style.display = "block";
       search.focus();
