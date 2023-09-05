@@ -114,20 +114,27 @@ function combineData(linksArray, sitesArray) {
   const combinedData = {};
   if (!linksArray.length || !sitesArray.length) return null;
   linksArray.forEach((connection) => {
-    const { id, status, termination_a_site, termination_z_site, color } =
-      connection;
+    const {
+      id,
+      status,
+      termination_a_site,
+      termination_z_site,
+      provider_color,
+    } = connection;
     const siteDetails = sitesArray.filter(
       (site) => termination_a_site === site.id || termination_z_site === site.id
     );
     if (siteDetails.length < 2) return;
+    console.log(connection);
     const combinedObject = {
       id,
       status,
-      color,
+      color: provider_color,
       terminations: siteDetails,
     };
     combinedData[id] = combinedObject;
   });
+  console.log(combinedData);
   return combinedData;
 }
 function visualizeCombinedData(
@@ -151,7 +158,7 @@ function visualizeCombinedData(
 }
 
 function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
-  if(!selectedTenants.length || !selectedLinkStatuses.length) return;
+  if (!selectedTenants.length || !selectedLinkStatuses.length) return;
   const LINKS_API_CALL = new URL(baseURL + "/api/plugins/geo_map/links/");
   if (selectedTenants.length !== providerSelect.children.length) {
     LINKS_API_CALL.searchParams.set("provider__in", selectedTenants.join(","));

@@ -46,7 +46,7 @@ class GeoMapHomeView(PermissionRequiredMixin, View):
                     {
                         "value": provider.id,
                         "label": provider.name,
-                        "color": provider.cf.get("color"),
+                        "color": provider.cf.get("provider_color"),
                     }
                     for provider in providers
                 ],
