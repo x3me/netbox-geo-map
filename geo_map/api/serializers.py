@@ -32,31 +32,13 @@ class TerminationSerializer(NetBoxModelSerializer):
             "site",
         )
 
-
-class CableSerializer(NetBoxModelSerializer):
-    terminations = TerminationSerializer(many=True)
-
-    def provider_color(self, obj: Cable):
-        c = obj.provider.custom_fields.get("provider_color") if obj.provider else None
-        return c or obj['provider_color']
-
-    class Meta:
-        model = Cable
-        fields = (
-            "id",
-            "status",
-            "terminations",
-            "provider_color",
-        )
-
-
 class CircuitSerializer(NetBoxModelSerializer):
     termination_a_site = serializers.IntegerField(source="termination_a.site_id")
     termination_z_site = serializers.IntegerField(source="termination_z.site_id")
 
     provider_color = serializers.CharField(allow_blank=True, allow_null=True)
 
-    def get_color(self, obj: Circuit):
+    def get_provider_color(self, obj: Circuit):
         return obj.provider.cf.get("provider_color") if obj.provider else None
 
     class Meta:

@@ -121,11 +121,12 @@ function combineData(linksArray, sitesArray) {
       termination_z_site,
       provider_color,
     } = connection;
+    if(provider_color) console.log(provider_color)
     const siteDetails = sitesArray.filter(
       (site) => termination_a_site === site.id || termination_z_site === site.id
     );
     if (siteDetails.length < 2) return;
-    console.log(connection);
+   // console.log(connection);
     const combinedObject = {
       id,
       status,
