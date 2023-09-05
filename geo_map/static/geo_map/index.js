@@ -133,7 +133,6 @@ function combineData(linksArray, sitesArray) {
     };
     combinedData[id] = combinedObject;
   });
-  console.log(combinedData);
   return combinedData;
 }
 function visualizeCombinedData(
@@ -269,7 +268,10 @@ function addMarker(data) {
     anchor: new google.maps.Point(7, 7),
   };
   const marker = new google.maps.Marker({
-    position: data.location,
+    position: new google.maps.LatLng(
+      parseFloat(data.location.lat),
+      parseFloat(data.location.lng)
+    ),
     map: map,
     icon: image,
     optimized: true,
@@ -295,7 +297,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,1 0,-1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -309,7 +311,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -323,7 +325,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -337,7 +339,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-5 0,5",
           strokeOpacity: 1,
           scale: 1,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -351,7 +353,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -362,7 +364,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -376,7 +378,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -387,7 +389,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
