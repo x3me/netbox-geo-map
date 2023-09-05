@@ -54,7 +54,7 @@
 </div>
 {% endblock %}
 {% block javascript %}
-<script async src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap"></script>
 <script src="{% static 'geo_map/kml.js' %}"></script>
 <script src="{% static 'geo_map/index.js' %}"></script>
 <script src="{% static 'geo_map/multiselect.js' %}"></script>

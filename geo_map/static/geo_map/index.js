@@ -257,7 +257,7 @@ function addMarker(data) {
   if (data.location.lat === 0 || data.location.lng === 0) return;
   const image = {
     url: data.icon,
-    scaledSize: new google.maps.Size(10, 10),
+    scaledSize: new google.maps.Size(12, 12),
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(7, 7),
   };
@@ -277,7 +277,7 @@ function addMarker(data) {
   }
 }
 function generateSiteHTML(site) {
-  return "<a href=" + site.url + ">" + site.name + "</a>";
+  return "<a target='_blank' href=" + site.url + ">" + site.name + "</a>";
 }
 function drawPolyline(terminations, connection) {
   const lineSymbolPath = {
