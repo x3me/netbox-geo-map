@@ -48,7 +48,9 @@ class SiteViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
 class LinkViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
     permission_required = "circuits.view_circuit"
 
-    queryset = Circuit.objects.all().prefetch_related("termination_a", "termination_z")
+    queryset = Circuit.objects.all().prefetch_related(
+        "termination_a", "termination_z", "provider"
+    )
     serializer_class = CircuitSerializer
     filterset_class = CircuitFilter
 
