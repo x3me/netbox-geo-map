@@ -33,7 +33,7 @@ class CircuitFilter(filters.FilterSet):
         model = Circuit
         fields = {
             "status": ["exact", "in"],
-            "tenant": ["exact", "in"],
+            "provider": ["exact", "in"],
         }
 
 

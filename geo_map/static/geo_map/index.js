@@ -151,9 +151,10 @@ function visualizeCombinedData(
 }
 
 function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
+  if(!selectedTenants.length || !selectedLinkStatuses.length) return;
   const LINKS_API_CALL = new URL(baseURL + "/api/plugins/geo_map/links/");
   if (selectedTenants.length !== providerSelect.children.length) {
-    LINKS_API_CALL.searchParams.set("tenant__in", selectedTenants.join(","));
+    LINKS_API_CALL.searchParams.set("provider__in", selectedTenants.join(","));
     LINKS_API_CALL.search = LINKS_API_CALL.searchParams.toString();
   }
   LINKS_API_CALL.searchParams.set("status__in", selectedLinkStatuses.join(","));
