@@ -112,7 +112,7 @@ function MultiselectDropdown(options) {
         op.appendChild(ic);
 
         if (el.id === "providerSelect") {
-          let color = o.getAttribute("color");
+          let color = o.getAttribute("data-color");
           let colorSquare = newEl("div", {
             class: "color-square",
             style: {

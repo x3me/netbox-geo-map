@@ -427,7 +427,7 @@ function calculateCenter(data) {
   const averageLng = sumLng / totalSites;
 
   if (isNaN(averageLat) || isNaN(averageLng)) {
-    return { lat: 28.6139, lng: 77.209 };
+    return { lat: 23.5, lng: 78.6677428 };
   }
   return { lat: averageLat, lng: averageLng };
 }
