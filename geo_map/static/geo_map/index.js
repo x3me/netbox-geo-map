@@ -204,7 +204,7 @@ function fetchDataAndCreateMap(
       const centerCoordinates = calculateCenter(data);
       const mapOptions = {
         center: centerCoordinates,
-        zoom: 7,
+        zoom: 6,
       };
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
       zoom = map.getZoom();

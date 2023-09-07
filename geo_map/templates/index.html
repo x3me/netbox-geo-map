@@ -12,7 +12,7 @@
         <select name="providerSelect" id="providerSelect" multiple multiselect-search="true"
             multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Vendor">
             {% for provider in providers %}
-            <option value="{{provider.value}}">{{provider.label}}</option>
+            <option value="{{provider.value}}" color="{{provider.color}}">{{provider.label}}</option>
             {% endfor %}
         </select>
         <select name="fiberLinkStatus" id="fiberLinkStatus" multiple multiselect-search="true"

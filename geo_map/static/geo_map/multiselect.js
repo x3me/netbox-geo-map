@@ -110,6 +110,24 @@ function MultiselectDropdown(options) {
         let op = newEl("div", { class: o.selected ? "checked" : "", optEl: o });
         let ic = newEl("input", { type: "checkbox", checked: o.selected });
         op.appendChild(ic);
+
+        if (el.id === "providerSelect") {
+          let color = o.getAttribute("color");
+          let colorSquare = newEl("div", {
+            class: "color-square",
+            style: {
+              background: color,
+              border: "1px solid #767676",
+              width: "13px",
+              height: "13px",
+              borderRadius: "2px",
+              marginRight: "5px",
+            },
+          });
+
+          op.appendChild(colorSquare);
+        }
+
         op.appendChild(newEl("label", { text: o.text }));
         op.addEventListener("click", () => {
           op.classList.toggle("checked");
@@ -142,7 +160,8 @@ function MultiselectDropdown(options) {
           sels.map((x) => {
             let c = newEl("span", {
               class: "optext",
-              text: x.text,
+              text:
+                x.text.length > 19 ? x.text.substring(0, 19) + ".." : x.text,
               srcOption: x,
             });
             if (el.attributes["multiselect-hide-x"]?.value !== "true")
