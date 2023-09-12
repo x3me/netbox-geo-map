@@ -114,8 +114,13 @@ function combineData(linksArray, sitesArray) {
   const combinedData = {};
   if (!linksArray.length || !sitesArray.length) return null;
   linksArray.forEach((connection) => {
-    const { id, status, termination_a_site, termination_z_site, color } =
-      connection;
+    const {
+      id,
+      status,
+      termination_a_site,
+      termination_z_site,
+      provider_color,
+    } = connection;
     const siteDetails = sitesArray.filter(
       (site) => termination_a_site === site.id || termination_z_site === site.id
     );
@@ -123,7 +128,7 @@ function combineData(linksArray, sitesArray) {
     const combinedObject = {
       id,
       status,
-      color,
+      color: provider_color,
       terminations: siteDetails,
     };
     combinedData[id] = combinedObject;
@@ -151,9 +156,10 @@ function visualizeCombinedData(
 }
 
 function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
+  if (!selectedTenants.length || !selectedLinkStatuses.length) return;
   const LINKS_API_CALL = new URL(baseURL + "/api/plugins/geo_map/links/");
   if (selectedTenants.length !== providerSelect.children.length) {
-    LINKS_API_CALL.searchParams.set("tenant__in", selectedTenants.join(","));
+    LINKS_API_CALL.searchParams.set("provider__in", selectedTenants.join(","));
     LINKS_API_CALL.search = LINKS_API_CALL.searchParams.toString();
   }
   LINKS_API_CALL.searchParams.set("status__in", selectedLinkStatuses.join(","));
@@ -198,7 +204,7 @@ function fetchDataAndCreateMap(
       const centerCoordinates = calculateCenter(data);
       const mapOptions = {
         center: centerCoordinates,
-        zoom: 7,
+        zoom: 6,
       };
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
       zoom = map.getZoom();
@@ -257,12 +263,15 @@ function addMarker(data) {
   if (data.location.lat === 0 || data.location.lng === 0) return;
   const image = {
     url: data.icon,
-    scaledSize: new google.maps.Size(10, 10),
+    scaledSize: new google.maps.Size(12, 12),
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(7, 7),
   };
   const marker = new google.maps.Marker({
-    position: data.location,
+    position: new google.maps.LatLng(
+      parseFloat(data.location.lat),
+      parseFloat(data.location.lng)
+    ),
     map: map,
     icon: image,
     optimized: true,
@@ -277,7 +286,7 @@ function addMarker(data) {
   }
 }
 function generateSiteHTML(site) {
-  return "<a href=" + site.url + ">" + site.name + "</a>";
+  return "<a target='_blank' href=" + site.url + ">" + site.name + "</a>";
 }
 function drawPolyline(terminations, connection) {
   const lineSymbolPath = {
@@ -288,7 +297,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,1 0,-1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -302,7 +311,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -316,7 +325,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -330,7 +339,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-5 0,5",
           strokeOpacity: 1,
           scale: 1,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -344,7 +353,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -355,7 +364,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -369,7 +378,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -380,7 +389,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1,
+          strokeWeight: 1.5,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -418,7 +427,7 @@ function calculateCenter(data) {
   const averageLng = sumLng / totalSites;
 
   if (isNaN(averageLat) || isNaN(averageLng)) {
-    return { lat: 28.6139, lng: 77.209 };
+    return { lat: 23.5, lng: 78.6677428 };
   }
   return { lat: averageLat, lng: averageLng };
 }

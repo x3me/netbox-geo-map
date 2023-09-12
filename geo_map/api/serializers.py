@@ -32,15 +32,14 @@ class TerminationSerializer(NetBoxModelSerializer):
             "site",
         )
 
-
 class CircuitSerializer(NetBoxModelSerializer):
     termination_a_site = serializers.IntegerField(source="termination_a.site_id")
     termination_z_site = serializers.IntegerField(source="termination_z.site_id")
 
-    color = serializers.SerializerMethodField()
+    provider_color = serializers.SerializerMethodField()
 
-    def get_color(self, obj: Circuit):
-        return obj.provider.cf.get("color") if obj.provider else None
+    def get_provider_color(self, obj: Circuit):
+        return obj.provider.cf.get("provider_color") if obj.provider else None
 
     class Meta:
         model = Circuit
@@ -49,5 +48,5 @@ class CircuitSerializer(NetBoxModelSerializer):
             "status",
             "termination_a_site",
             "termination_z_site",
-            "color",
+            "provider_color",
         )
