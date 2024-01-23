@@ -71,7 +71,7 @@ function initMap() {
       fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
     }, 1000)
   );
-
+  
   providerSelect.addEventListener(
     "change",
     debounce(function () {

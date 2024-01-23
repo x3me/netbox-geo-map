@@ -116,6 +116,7 @@ function MultiselectDropdown(options) {
           let colorSquare = newEl("div", {
             class: "color-square",
             style: {
+              display: "block",
               background: color,
               border: "1px solid #767676",
               width: "13px",
@@ -196,10 +197,23 @@ function MultiselectDropdown(options) {
       list
         .querySelectorAll(":scope div:not(.multiselect-dropdown-all-selector)")
         .forEach((d) => {
-          let txt = d.querySelector("label").innerText.toUpperCase();
-          d.style.display = txt.includes(search.value.toUpperCase())
-            ? "block"
-            : "none";
+          let label = d.querySelector("label");
+          let txt = label ? label.textContent : "";
+          let square = d.querySelector(".color-square");
+          txt = txt.toUpperCase();
+          if (square) {
+            square.style.display = txt.includes(search.value.toUpperCase())
+              ? "block"
+              : "none";
+
+            if (txt.includes(search.value.toUpperCase())) {
+              square.parentNode.style.display = "flex";
+              square.style.display = "flex";
+            } else {
+              square.parentNode.style.display = "none";
+              square.style.display = "none";
+            }
+          }
         });
     });
     div.addEventListener("click", () => {
