@@ -198,22 +198,12 @@ function MultiselectDropdown(options) {
         .querySelectorAll(":scope div:not(.multiselect-dropdown-all-selector)")
         .forEach((d) => {
           let label = d.querySelector("label");
-          let txt = label ? label.textContent : "";
-          let square = d.querySelector(".color-square");
-          txt = txt.toUpperCase();
-          if (square) {
-            square.style.display = txt.includes(search.value.toUpperCase())
-              ? "block"
+          if (!label) return;
+          let text = label.textContent.toUpperCase();
+          d.style.display =
+            search.value && text.includes(search.value.toUpperCase())
+              ? "flex"
               : "none";
-
-            if (txt.includes(search.value.toUpperCase())) {
-              square.parentNode.style.display = "flex";
-              square.style.display = "flex";
-            } else {
-              square.parentNode.style.display = "none";
-              square.style.display = "none";
-            }
-          }
         });
     });
     div.addEventListener("click", () => {
