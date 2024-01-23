@@ -201,9 +201,9 @@ function MultiselectDropdown(options) {
           if (!label) return;
           let text = label.textContent.toUpperCase();
           d.style.display =
-            search.value && text.includes(search.value.toUpperCase())
-              ? "flex"
-              : "none";
+            search.value && !text.includes(search.value.toUpperCase())
+              ? "none"
+              : "flex";
         });
     });
     div.addEventListener("click", () => {
