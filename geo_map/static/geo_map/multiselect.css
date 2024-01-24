@@ -1,3 +1,15 @@
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+  display: flex;
+  border: 0;
+  box-shadow: 0px 2px 4px rgba(226, 221, 221, 0.1);
+}
+
+.leaflet-touch .leaflet-bar a {
+  width: 40px;
+  height: 40px;
+  line-height: 30px;
+}
 .multiselect-dropdown {
   display: inline-block;
   padding: 2px 5px 0px 5px;

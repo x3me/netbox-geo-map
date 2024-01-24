@@ -4,11 +4,14 @@
 
 {% block header %}
 <link rel="stylesheet" href="{% static 'geo_map/multiselect.css' %}">
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     
+     crossorigin=""/>
 {% endblock %}
 
 {% block content-wrapper %}
 <div style="position: relative; display: none;" id="container">
-    <div style="display: flex; flex-direction:row;position: absolute; left: 178px; z-index:3; margin-top: 10px;">
+    <div style="display: flex; flex-direction:row;position: absolute; left: 178px; z-index:401; margin-top: 10px;">
         <select name="providerSelect" id="providerSelect" multiple multiselect-search="true"
             multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Vendor">
             {% for provider in providers %}
@@ -44,7 +47,7 @@
             </div>
         </div>
     </div>
-    <div id="map" style="height: 200px; width: 100%; position: relative;"></div>
+    <div id="map" style="height: 80%; width: 100%; position: relative;"></div>
 </div>
 <div id="loader" class="position-absolute top-50 start-50 translate-middle d-block">
     <div class="spinner-border text-primary" role="status" style="width: 5em; height: 5em;">
@@ -56,6 +59,9 @@
 {% block javascript %}
 <script src="{% static 'geo_map/index.js' %}"></script>
 <script async src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    
+     crossorigin=""></script>
 <script src="{% static 'geo_map/kml.js' %}"></script>
 <script src="{% static 'geo_map/multiselect.js' %}"></script>
 {% endblock %}

@@ -1,5 +1,6 @@
 let map;
 let zoom;
+let layer;
 let allSites = [];
 let allLinks = [];
 const displayedPolylines = [];
@@ -16,6 +17,15 @@ setMapHeight();
 window.addEventListener("resize", setMapHeight);
 
 function initMap() {
+  const mapOptions = {
+    center: [23.5, 78.6677428],
+    zoom: 6,
+  };
+  map = L.map("map", mapOptions);
+
+  layer = new L.TileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+  map.addLayer(layer);
+
   const providerSelect = document.getElementById("providerSelect");
   const linkStatusSelect = document.getElementById("fiberLinkStatus");
   const statusSelect = document.getElementById("statusSelect");
@@ -71,7 +81,7 @@ function initMap() {
       fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
     }, 1000)
   );
-  
+
   providerSelect.addEventListener(
     "change",
     debounce(function () {
@@ -201,13 +211,8 @@ function fetchDataAndCreateMap(
     .then((response) => response.json())
     .then((data) => {
       allSites = JSON.parse(JSON.stringify(data));
-      const centerCoordinates = calculateCenter(data);
-      const mapOptions = {
-        center: centerCoordinates,
-        zoom: 6,
-      };
-      map = new google.maps.Map(document.getElementById("map"), mapOptions);
-      zoom = map.getZoom();
+      // const centerCoordinates = calculateCenter(data);
+
       if (selectedTenants && selectedLinkStatuses) {
         const combinedData = combineData(allLinks, allSites);
         visualizeCombinedData(
@@ -261,29 +266,21 @@ function fetchDataAndCreateMap(
 }
 function addMarker(data) {
   if (data.location.lat === 0 || data.location.lng === 0) return;
-  const image = {
-    url: data.icon,
-    scaledSize: new google.maps.Size(12, 12),
-    origin: new google.maps.Point(0, 0),
-    anchor: new google.maps.Point(7, 7),
-  };
-  const marker = new google.maps.Marker({
-    position: new google.maps.LatLng(
-      parseFloat(data.location.lat),
-      parseFloat(data.location.lng)
-    ),
-    map: map,
-    icon: image,
-    optimized: true,
+
+  let icon = L.icon({
+    iconUrl: data.icon,
+    iconSize: [12, 12],
+    iconAnchor: [7, 7],
+    popupAnchor: [0, -7],
   });
-  if (data.content) {
-    const infoWindow = new google.maps.InfoWindow({
-      content: data.content,
-    });
-    marker.addListener("click", () => {
-      infoWindow.open(map, marker);
-    });
-  }
+
+  const marker = L.marker([data.location.lat, data.location.lng], {
+    draggable: false,
+    icon,
+  })
+    .addTo(map)
+    .bindPopup(data.content)
+    .openPopup();
 }
 function generateSiteHTML(site) {
   return "<a target='_blank' href=" + site.url + ">" + site.name + "</a>";
@@ -399,38 +396,38 @@ function drawPolyline(terminations, connection) {
   };
   const paths = terminations.map((t) => {
     if (t.latitude === 0 || t.longitude === 0) return null;
-    return { lat: t.latitude, lng: t.longitude };
+    return [t.latitude, t.longitude];
   });
+  // console.log(paths);
   if (connection.status && !paths.includes(null)) {
-    const polyline = new google.maps.Polyline({
-      path: paths,
-      geodesic: true,
-      strokeOpacity: 0,
-      icons: [...lineSymbolPath[connection.status]],
-    });
-    polyline.setMap(map);
-    displayedPolylines.push(polyline);
+    const polyline = L.polyline(paths, {
+      color: connection.color,
+      weight: 2,
+      opacity: 0.5,
+      dashArray: lineSymbolPath[connection.status][0].repeat,
+    }).addTo(map);
+    map.fitBounds(polyline.getBounds());
   }
 }
 
 function clearDisplayedPolylines() {
   for (const polyline of displayedPolylines) {
-    polyline.setMap(null);
+    polyline.remove();
   }
   displayedPolylines.length = 0;
 }
-function calculateCenter(data) {
-  const totalSites = data.length;
-  const sumLat = data.reduce((sum, site) => sum + site.latitude, 0);
-  const sumLng = data.reduce((sum, site) => sum + site.longitude, 0);
-  const averageLat = sumLat / totalSites;
-  const averageLng = sumLng / totalSites;
+// function calculateCenter(data) {
+//   const totalSites = data.length;
+//   const sumLat = data.reduce((sum, site) => sum + site.latitude, 0);
+//   const sumLng = data.reduce((sum, site) => sum + site.longitude, 0);
+//   const averageLat = sumLat / totalSites;
+//   const averageLng = sumLng / totalSites;
 
-  if (isNaN(averageLat) || isNaN(averageLng)) {
-    return { lat: 23.5, lng: 78.6677428 };
-  }
-  return { lat: averageLat, lng: averageLng };
-}
+//   if (isNaN(averageLat) || isNaN(averageLng)) {
+//     return { lat: 23.5, lng: 78.6677428 };
+//   }
+//   return { lat: averageLat, lng: averageLng };
+// }
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
