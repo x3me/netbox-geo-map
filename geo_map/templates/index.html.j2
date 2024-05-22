@@ -1,11 +1,12 @@
 {% extends 'base/layout.html' %}
 {% load static %}
-{% block header %}
+{% block head %}
 <link rel="stylesheet" href="{% static 'geo_map/multiselect.css' %}">
-{% endblock %}
-{% block content-wrapper %}
-<div style="position:relative; display:none;" id="container">
-    <div style="display:flex; position:absolute; left:178px; z-index:3; margin-top: 10px; margin-right:50px; justify-content:space-between;">
+{% endblock head %}
+{% block content %}
+<div class="relative" id="container">
+    <div class="bg-surface-secondary d-flex mb-3 justify-content-between align-items-center">
+        <div class="d-flex">
             <div class="select-container">
                 <select name="providerSelect" id="providerSelect" multiple multiselect-search="true"
                     multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Vendor">
@@ -21,41 +22,54 @@
                 </select>
             </div>
             <div class="select-container">
-                <select name="statusSelect" id="statusSelect" multiple multiselect-search="true" multiselect-select-all="true"
-                    multiselect-max-items="3" placeholder="POP Status">
+                <select name="statusSelect" id="statusSelect" multiple multiselect-search="true"
+                    multiselect-select-all="true" multiselect-max-items="3" placeholder="POP Status">
                     {% for status in site_statuses %}
                     <option value="{{status.value}}">{{status.label}}</option>
                     {% endfor %}
                 </select>
-                <select name="groupSelect" id="groupSelect" multiple multiselect-search="true" multiselect-select-all="true"
-                    multiselect-max-items="3" placeholder="POP Groups">
-                {% for group in site_groups %}
-                    <option value="{{group.label}}" {% if group.label == "Pit" %} selected class="checked" {% endif %}>
+                <select name="groupSelect" id="groupSelect" multiple multiselect-search="true"
+                    multiselect-select-all="true" multiselect-max-items="3" placeholder="POP Groups">
+                    {% for group in site_groups %}
+                    <option value="{{group.label}}" {% if group.label=="Pit" %} selected class="checked" {% endif %}>
                         {{group.label}}
                     </option>
-                {% endfor %}
+                    {% endfor %}
                 </select>
             </div>
-            <div style="display:flex;flex-direction:column;">
-                <button id="actions">
-                    Actions
-                </button>
-                <div id="actions-content">
+        </div>
+        <div class="d-flex flex-column align-content-stretch flex-wrap gap-0">
+            <button id="actions" class="btn btn-surface-secondary">
+                Actions
+            </button>
+            <button id="actions-content" class="btn btn-surface-secondary">
+                Export Pops KML
+            </button>
+        </div>
+
+        {# <div class="dropdown">
+            <button id="actions" class="btn btn-surface-secondary">
+                Actions
+            </button>
+            <div class="dropdown-content">
+                <div id="actions-content" class="btn btn-surface-secondary">
                     Export Pops KML
                 </div>
             </div>
+        </div> #}
     </div>
-    <div id="map" style="height: 200px; width: 100%; position:relative;"></div>
+    <div id="map" style="height: 400px; width: 100%; position:relative;"></div>
 </div>
 <div id="loader" class="position-absolute top-50 start-50 translate-middle d-block">
     <div class="spinner-border text-primary" role="status" style="width: 5em; height: 5em;">
         <span class="visually-hidden">Loading...</span>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}
 {% block javascript %}
 <script src="{% static 'geo_map/index.js' %}"></script>
-<script async src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap"></script>
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap&libraries=marker"></script>
 <script src="{% static 'geo_map/kml.js' %}"></script>
 <script src="{% static 'geo_map/multiselect.js' %}"></script>
 {% endblock %}

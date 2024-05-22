@@ -10,7 +10,8 @@ const loader = document.getElementById("loader");
 const container = document.getElementById("container");
 
 function setMapHeight() {
-  mapContainer.style.height = content.clientHeight + "px";
+  const page_content = document.getElementById("page-content");
+  mapContainer.style.height = page_content.clientHeight + "px";
 }
 setMapHeight();
 window.addEventListener("resize", setMapHeight);
@@ -205,6 +206,7 @@ function fetchDataAndCreateMap(
       const mapOptions = {
         center: centerCoordinates,
         zoom: 6,
+        mapId: 'Netbox_MAP_ID'
       };
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
       zoom = map.getZoom();
@@ -225,6 +227,10 @@ function fetchDataAndCreateMap(
             addMarker({
               location: { lat: site.latitude, lng: site.longitude },
               icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
+            //   content: <gmp-advanced-marker
+            //   position={`${site.latitude}, ${site.longitude}`}
+            //   title={ "<a target='_blank' href=" + site.url + ">" + site.name + "</a>"}
+            // ></gmp-advanced-marker>
               content: generateSiteHTML(site),
             });
           }
@@ -235,6 +241,10 @@ function fetchDataAndCreateMap(
             addMarker({
               location: { lat: site.latitude, lng: site.longitude },
               icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
+            //   content: <gmp-advanced-marker
+            //   position={`${site.latitude}, ${site.longitude}`}
+            //   title={ "<a target='_blank' href=" + site.url + ">" + site.name + "</a>"}
+            // ></gmp-advanced-marker>
               content: generateSiteHTML(site),
             });
           }
@@ -245,7 +255,11 @@ function fetchDataAndCreateMap(
             addMarker({
               location: { lat: site.latitude, lng: site.longitude },
               icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
-              content: generateSiteHTML(site),
+            //   content: <gmp-advanced-marker
+            //   position={`${site.latitude}, ${site.longitude}`}
+            //   title={ "<a target='_blank' href=" + site.url + ">" + site.name + "</a>"}
+            // ></gmp-advanced-marker>
+             content: generateSiteHTML(site),
             });
           }
         });
@@ -260,6 +274,7 @@ function fetchDataAndCreateMap(
     });
 }
 function addMarker(data) {
+  const {AdvancedMarkerElement} = google.maps.importLibrary("marker")
   if (data.location.lat === 0 || data.location.lng === 0) return;
   const image = {
     url: data.icon,
@@ -267,7 +282,8 @@ function addMarker(data) {
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(7, 7),
   };
-  const marker = new google.maps.Marker({
+
+  const marker =  new AdvancedMarkerElement({
     position: new google.maps.LatLng(
       parseFloat(data.location.lat),
       parseFloat(data.location.lng)
@@ -275,14 +291,27 @@ function addMarker(data) {
     map: map,
     icon: image,
     optimized: true,
+    gmpClickable: false,
+    title: generateSiteHTML(data),
   });
   if (data.content) {
+    
     const infoWindow = new google.maps.InfoWindow({
       content: data.content,
     });
-    marker.addListener("click", () => {
+    // marker.addListener("click", () => {
+    //   infoWindow.open(map, marker);
+    // });
+    marker.addListener('mouseover', () => {
+      console.log('Mouseover event triggered on marker');
       infoWindow.open(map, marker);
     });
+
+    marker.addListener('mouseout', () => {
+      console.log('Mouseout event triggered on marker');
+      infoWindow.close();
+    });
+
   }
 }
 function generateSiteHTML(site) {

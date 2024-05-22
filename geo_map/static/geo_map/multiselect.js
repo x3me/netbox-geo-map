@@ -12,6 +12,7 @@ function MultiselectDropdown(options) {
     let e = document.createElement(tag);
     if (attrs !== undefined)
       Object.keys(attrs).forEach((k) => {
+        console.log("attrs", attrs, k, attrs[k]);
         if (k === "class") {
           Array.isArray(attrs[k])
             ? attrs[k].forEach((o) => (o !== "" ? e.classList.add(o) : 0))
@@ -30,7 +31,7 @@ function MultiselectDropdown(options) {
   }
   document.querySelectorAll("select[multiple]").forEach((el, k) => {
     let div = newEl("div", {
-      class: "multiselect-dropdown",
+      class: "multiselect-dropdown btn btn-secondary",
       style: {
         width: config.style?.width ?? el.clientWidth + "px",
         padding: config.style?.padding ?? "",
@@ -112,6 +113,8 @@ function MultiselectDropdown(options) {
         op.appendChild(ic);
 
         if (el.id === "providerSelect") {
+          
+          console.log("providerSelect", el.id, o.dataset.color);
           const { color } = o.dataset;
           let colorSquare = newEl("div", {
             class: "color-square",

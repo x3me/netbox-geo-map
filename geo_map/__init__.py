@@ -1,4 +1,4 @@
-from extras.plugins import PluginConfig
+from netbox.plugins import PluginConfig
 
 
 class GeoMapConfig(PluginConfig):
@@ -8,6 +8,7 @@ class GeoMapConfig(PluginConfig):
     version = "0.1"
     base_url = "geo_map"
     required_settings = ["google_maps_key"]
+    
 
 
 config = GeoMapConfig
