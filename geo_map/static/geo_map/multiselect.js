@@ -12,12 +12,11 @@ function MultiselectDropdown(options) {
     let e = document.createElement(tag);
     if (attrs !== undefined)
       Object.keys(attrs).forEach((k) => {
-        console.log("attrs", attrs, k, attrs[k]);
-        if (k === "class") {
-          Array.isArray(attrs[k])
+    if (k === "class") {
+      Array.isArray(attrs[k])
             ? attrs[k].forEach((o) => (o !== "" ? e.classList.add(o) : 0))
             : attrs[k] !== ""
-            ? e.classList.add(attrs[k])
+            ? e.class = attrs[k].split(" ").map((o) => (o !== "" ? e.classList.add(o) : 0))
             : 0;
         } else if (k === "style") {
           Object.keys(attrs[k]).forEach((ks) => {
@@ -30,13 +29,17 @@ function MultiselectDropdown(options) {
     return e;
   }
   document.querySelectorAll("select[multiple]").forEach((el, k) => {
+    if (el.nextElementSibling && el.nextElementSibling.classList.contains('multiselect-dropdown')) {
+      return; 
+    }
     let div = newEl("div", {
-      class: "multiselect-dropdown btn btn-secondary",
+      class: ["multiselect-dropdown", "btn", "btn-surface-secondary"],
       style: {
         width: config.style?.width ?? el.clientWidth + "px",
         padding: config.style?.padding ?? "",
       },
     });
+
     el.style.display = "none";
     el.parentNode.insertBefore(div, el.nextSibling);
     let listWrap = newEl("div", { class: "multiselect-dropdown-list-wrapper" });
@@ -111,10 +114,9 @@ function MultiselectDropdown(options) {
         let op = newEl("div", { class: o.selected ? "checked" : "", optEl: o });
         let ic = newEl("input", { type: "checkbox", checked: o.selected });
         op.appendChild(ic);
-
+        // console.log('el.id',el.id)
         if (el.id === "providerSelect") {
-          
-          console.log("providerSelect", el.id, o.dataset.color);
+          console.log(o.dataset.color)
           const { color } = o.dataset;
           let colorSquare = newEl("div", {
             class: "color-square",
@@ -128,7 +130,6 @@ function MultiselectDropdown(options) {
               marginRight: "5px",
             },
           });
-
           op.appendChild(colorSquare);
         }
 
