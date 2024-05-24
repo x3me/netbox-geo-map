@@ -1,7 +1,7 @@
 from netbox.plugins import PluginMenu, PluginMenuItem
 
 menu = PluginMenu(
-    label="Site Map",
+    label="Map",
     icon_class="mdi mdi-map",
     groups=(
         (

@@ -293,7 +293,7 @@ async function addMarker(data) {
       });
     });
 
-    /****/ // NB!!! to discuss for desired behavior and decide if we want to keep it or not 
+    /****/ // NB!!! to discuss for desired behavior and decide if we want to keep it or not
     marker.addListener("mouseover", () => {
       infoWindow.open({
         anchor: marker,
