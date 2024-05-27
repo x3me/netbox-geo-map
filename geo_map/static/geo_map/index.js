@@ -293,7 +293,6 @@ async function addMarker(data) {
       });
     });
 
-    /****/ // NB!!! to discuss for desired behavior and decide if we want to keep it or not
     marker.addListener("mouseover", () => {
       infoWindow.open({
         anchor: marker,
@@ -309,7 +308,6 @@ async function addMarker(data) {
         shouldFocus: false,
       });
     });
-    /*********/
 
     marker.content.addEventListener("mouseout", () => {
       setTimeout(() => {
@@ -338,7 +336,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,1 0,-1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -352,7 +350,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -366,7 +364,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -380,7 +378,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-5 0,5",
           strokeOpacity: 1,
           scale: 1,
-          strokeWeight: 2,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -394,7 +392,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -405,7 +403,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -419,7 +417,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -430,7 +428,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 2,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",

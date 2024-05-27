@@ -31,18 +31,14 @@ function MultiselectDropdown(options) {
     return e;
   }
   document.querySelectorAll("select[multiple]").forEach((el, k) => {
-    // if (el.nextElementSibling && el.nextElementSibling.classList.contains('multiselect-dropdown')) {
-    //   return;
-    // }
     let div = newEl("div", {
-      class: ["multiselect-dropdown", "btn", "btn-surface-secondary"],
+      class: ["multiselect-dropdown", "btn"],
       style: {
         width: config.style?.width ?? el.clientWidth + "px",
         padding: config.style?.padding ?? "",
       },
     });
-
-    el.style.display = "none";
+    el.style.display = "block";
     el.parentNode.insertBefore(div, el.nextSibling);
     let listWrap = newEl("div", {
       class: ["multiselect-dropdown-list-wrapper", "bg-surface-secondary"],
@@ -77,7 +73,9 @@ function MultiselectDropdown(options) {
 
       if (el.attributes["multiselect-select-all"]?.value == "true") {
         let op = newEl("div", { class: "multiselect-dropdown-all-selector" });
-        let ic = newEl("input", { type: "checkbox" });
+        let ic = newEl("input", {
+          type: "checkbox",
+        });
         op.appendChild(ic);
         op.appendChild(newEl("label", { text: config.txtAll }));
         op.addEventListener("click", () => {
@@ -119,8 +117,14 @@ function MultiselectDropdown(options) {
       }
 
       Array.from(el.options).map((o) => {
-        let op = newEl("div", { class: o.selected ? "checked" : "", optEl: o });
-        let ic = newEl("input", { type: "checkbox", checked: o.selected });
+        let op = newEl("div", {
+          class: o.selected ? ["checked"] : "",
+          optEl: o,
+        });
+        let ic = newEl("input", {
+          type: "checkbox",
+          checked: o.selected,
+        });
         op.appendChild(ic);
         if (el.id === "providerSelect") {
           const { color } = o.dataset;

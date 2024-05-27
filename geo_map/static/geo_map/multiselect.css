@@ -16,7 +16,7 @@
   display: inline-block;
 }
 .multiselect-dropdown span.optext {
-  padding: 5px 12px;
+  padding: 9px 12px;
 }
 .multiselect-dropdown span.optext .optdel {
   float: right;
@@ -71,10 +71,11 @@
   margin-right: 0.35em;
 }
 .multiselect-dropdown-list input[type="checkbox"]:checked {
-  accent-color: #fff;
-  background-color: #1b293a;
+  accent-color: #fff !important;
+  background-color: #fff !important;
 }
 input[type="checkbox"] {
+  background-color: #fff !important;
   color-scheme: light !important;
 }
 
@@ -112,4 +113,13 @@ input[type="checkbox"] {
 
 .multiselect-dropdown .btn .btn-surface-secondary {
   color: black !important;
+}
+
+.placeholder {
+  opacity: 1 !important;
+}
+
+/* NB! **hide fullscreen button on map */
+.gm-fullscreen-control {
+  display: none !important;
 }
