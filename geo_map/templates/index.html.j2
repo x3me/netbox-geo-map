@@ -5,34 +5,36 @@
 {% endblock head %}
 {% block content %}
 <div class="relative" id="container">
-    <div class="bg-surface-secondary d-flex mb-3 justify-content-between align-items-center">
-        <div class="d-flex row-gap-3 col gap-3">
-            <div class="select-container row-gap-3 gap-3">
-                <select name="providerSelect" id="providerSelect" multiple multiselect-search="true"
-                    class="multiselect-dropdown btn"
+    <div class="actions-container bg-surface-secondary grid mb-3"
+        style="display: grid; grid-template-columns: 1fr 220px; gap: 8px;">
+
+        <div class="select-container grid gap-2">
+            <div class="grid-col-1 gap-col-2"
+             style="display:grid; row-gap: 8px;"
+            >
+                <select name="provider-select" id="provider-select" multiple multiselect-search="true"
                     multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Vendor">
                     {% for provider in providers %}
                     <option value="{{provider.value}}" data-color="{{provider.color}}">{{provider.label}}</option>
                     {% endfor %}
                 </select>
-                <select name="fiberLinkStatus" id="fiberLinkStatus" multiple multiselect-search="true"
-                class="multiselect-dropdown btn"
+                <select name="fiber-link-status" id="fiber-link-status" multiple multiselect-search="true"
                     multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Fiber Link Status">
                     {% for status in link_statuses %}
                     <option value="{{status.value}}">{{status.label}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="select-container row-gap-3 gap-3">
-                <select name="statusSelect" id="statusSelect" multiple multiselect-search="true"
-                    class="multiselect-dropdown btn"
+            <div class="grid-col-1 gap-row-2"
+            style="display:grid; row-gap: 8px;"
+            >
+                <select name="status-select" id="status-select" multiple multiselect-search="true"
                     multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Status">
                     {% for status in site_statuses %}
                     <option value="{{status.value}}">{{status.label}}</option>
                     {% endfor %}
                 </select>
-                <select name="groupSelect" id="groupSelect" multiple multiselect-search="true"
-                    class="multiselect-dropdown btn"
+                <select name="group-select" id="group-select" multiple multiselect-search="true"
                     multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Groups">
                     {% for group in site_groups %}
                     <option value="{{group.label}}" {% if group.label == "Pit" %} selected class="checked" {% endif %}>
@@ -42,13 +44,14 @@
                 </select>
             </div>
         </div>
-       
-        <div class="d-flex flex-column align-self-end flex-wrap gap-2 ">
-            <button id="actions-content" class="btn">
+
+        <div class="grid-col-1">
+            <button id="export-kml" class="btn" style="width: 220px; height: 40px;">
                 Export Pops KML
             </button>
         </div>
     </div>
+
     <div id="map" style="height: 400px; width: 100%; position:relative;"></div>
 </div>
 <div id="loader" class="position-absolute top-50 start-50 translate-middle d-block">
@@ -58,7 +61,9 @@
 </div>
 {% endblock content %}
 {% block javascript %}
+<script src="{% static 'geo_map/kml.js' %}"></script>
 <script src="{% static 'geo_map/index.js' %}"></script>
-<script async src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap&libraries=marker"></script>
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap&libraries=marker"></script>
 <script src="{% static 'geo_map/multiselect.js' %}"></script>
 {% endblock %}

@@ -126,7 +126,7 @@ function MultiselectDropdown(options) {
           checked: o.selected,
         });
         op.appendChild(ic);
-        if (el.id === "providerSelect") {
+        if (el.id === "provider-select") {
           const { color } = o.dataset;
           let colorSquare = newEl("div", {
             class: "color-square",
@@ -161,7 +161,7 @@ function MultiselectDropdown(options) {
 
       div.refresh = () => {
         div
-          .querySelectorAll("span.optext, span.placeholder")
+          .querySelectorAll("span.optext, span.dropdown-placeholder")
           .forEach((t) => div.removeChild(t));
         let sels = Array.from(el.selectedOptions);
         if (sels.length > 1) {
@@ -198,7 +198,8 @@ function MultiselectDropdown(options) {
         if (0 == el.selectedOptions.length)
           div.appendChild(
             newEl("span", {
-              class: ["placeholder", "ts-control", "bg-surface-secondary"],
+              class: ["dropdown-placeholder"],
+              style: { display: el.selectedOptions.length ? "none" : "flex" },
               text: el.attributes["placeholder"]?.value ?? config.placeholder,
             })
           );

@@ -5,15 +5,17 @@
   position: relative;
   background-position: right 0.75rem center;
   background-size: 16px 12px;
-  width: 250px !important;
+  min-width: 220px !important;
+  max-width: 250px !important;
   height: 40px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .multiselect-dropdown span.optext,
-.multiselect-dropdown span.placeholder {
+.multiselect-dropdown span.dropdown-placeholder {
   justify-content: center !important;
   display: inline-block;
+  opacity: 1 !important;
 }
 .multiselect-dropdown span.optext {
   padding: 9px 12px;
@@ -26,9 +28,10 @@
   cursor: pointer;
 }
 
-.multiselect-dropdown span.placeholder {
+.multiselect-dropdown span.dropdown-placeholder {
   display: block;
   text-align: center;
+  opacity: 1 !important;
 }
 .multiselect-dropdown-list-wrapper {
   z-index: 100;
@@ -84,28 +87,20 @@ input[type="checkbox"] {
   font-size: 16px !important;
 }
 
-#actions-content {
-  display: block;
-  padding: 8px 20px;
-  font-family: Roboto, Arial, sans-serif;
-  font-size: 14px;
-  cursor: pointer;
-  width: 180px !important;
-  height: 40px;
-  margin-top: 2px;
-  text-align: center;
-}
-
-.select-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-@media (max-width: 1920px) {
-  .select-container {
+@media (max-width: 780px) {
+  .actions-container {
+    display: flex;
     flex-direction: column;
   }
 }
+
+@media (max-width: 770px) {
+  .actions-container {
+    display: grid;
+    grid-template-columns: 1fr !important;
+  }
+}
+
 
 .ts-wrapper:not(.form-control, .form-select) {
   display: none !important;
@@ -114,11 +109,10 @@ input[type="checkbox"] {
 .multiselect-dropdown .btn .btn-surface-secondary {
   color: black !important;
 }
-
-.placeholder {
-  opacity: 1 !important;
+.multiselect-dropdown.btn {
+  display: flex !important;
+  align-items: center !important;
 }
-
 /* NB! **hide fullscreen button on map */
 .gm-fullscreen-control {
   display: none !important;

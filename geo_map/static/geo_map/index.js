@@ -8,21 +8,20 @@ const mapContainer = document.querySelector("#map");
 const baseURL = window.location.origin;
 const loader = document.getElementById("loader");
 const container = document.getElementById("container");
+const providerSelect = document.getElementById("provider-select");
+const linkStatusSelect = document.getElementById("fiber-link-status");
+const statusSelect = document.getElementById("status-select");
+const groupSelect = document.getElementById("group-select");
+const exportButton = document.getElementById("export-kml");
+const pageContent = document.getElementById("page-content");
 
 function setMapHeight() {
-  const page_content = document.getElementById("page-content");
-  mapContainer.style.height = page_content.clientHeight + "px";
+  mapContainer.style.height = pageContent.clientHeight + "px";
 }
 setMapHeight();
 window.addEventListener("resize", setMapHeight);
 
 async function initMap() {
-  const providerSelect = document.getElementById("providerSelect");
-  const linkStatusSelect = document.getElementById("fiberLinkStatus");
-  const statusSelect = document.getElementById("statusSelect");
-  const groupSelect = document.getElementById("groupSelect");
-  const actionsContent = document.getElementById("actions-content");
-
   let selectedTenants = [];
   let selectedLinkStatuses = [];
   let selectedStatuses = [];
@@ -85,12 +84,8 @@ async function initMap() {
     }, 1000)
   );
 
-  actionsContent.addEventListener("click", function () {
+  exportButton.addEventListener("click", function () {
     exportKML(allSites);
-    actionsContent.style.display = "block";
-  });
-  document.addEventListener("click", function (event) {
-    actionsContent.style.display = "block";
   });
   fetchDataAndCreateMap(
     selectedStatuses,
