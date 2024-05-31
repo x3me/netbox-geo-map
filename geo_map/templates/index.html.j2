@@ -6,48 +6,40 @@
 {% block content %}
 <div class="relative" id="container">
     <div class="actions-container bg-surface-secondary grid mb-3"
-        style="display: grid; grid-template-columns: 1fr 220px; gap: 8px;">
+        style="display: grid; grid-template-columns: 460px 220px; gap: 8px; justify-content: space-between; ">
 
-        <div class="select-container grid gap-2">
-            <div class="grid-col-1 gap-col-2"
-             style="display:grid; row-gap: 8px;"
-            >
-                <select name="provider-select" id="provider-select" multiple multiselect-search="true"
-                    multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Vendor">
-                    {% for provider in providers %}
-                    <option value="{{provider.value}}" data-color="{{provider.color}}">{{provider.label}}</option>
-                    {% endfor %}
-                </select>
-                <select name="fiber-link-status" id="fiber-link-status" multiple multiselect-search="true"
-                    multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Fiber Link Status">
-                    {% for status in link_statuses %}
-                    <option value="{{status.value}}">{{status.label}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="grid-col-1 gap-row-2"
-            style="display:grid; row-gap: 8px;"
-            >
-                <select name="status-select" id="status-select" multiple multiselect-search="true"
-                    multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Status">
-                    {% for status in site_statuses %}
-                    <option value="{{status.value}}">{{status.label}}</option>
-                    {% endfor %}
-                </select>
-                <select name="group-select" id="group-select" multiple multiselect-search="true"
-                    multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Groups">
-                    {% for group in site_groups %}
-                    <option value="{{group.label}}" {% if group.label == "Pit" %} selected class="checked" {% endif %}>
-                        {{group.label}}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="select-container">
+
+            <select name="provider-select" id="provider-select" multiple multiselect-search="true"
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Vendor">
+                {% for provider in providers %}
+                <option value="{{provider.value}}" data-color="{{provider.color}}">{{provider.label}}</option>
+                {% endfor %}
+            </select>
+            <select name="fiber-link-status" id="fiber-link-status" multiple multiselect-search="true"
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Fiber Link Status">
+                {% for status in link_statuses %}
+                <option value="{{status.value}}">{{status.label}}</option>
+                {% endfor %}
+            </select>
+
+            <select name="status-select" id="status-select" multiple multiselect-search="true"
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Status">
+                {% for status in site_statuses %}
+                <option value="{{status.value}}">{{status.label}}</option>
+                {% endfor %}
+            </select>
+            <select name="group-select" id="group-select" multiple multiselect-search="true"
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Groups">
+                {% for group in site_groups %}
+                <option value="{{group.label}}" {% if group.label == "Pit" %} selected class="checked" {% endif %}>
+                    {{group.label}}
+                </option>
+                {% endfor %}
+            </select>
         </div>
 
-        <div class="grid-col-1"
-        style="display:grid; align-self:end;"
-        >
+        <div class="grid-col-1" style="display:grid; align-self:end;">
             <button id="export-kml" class="btn" style="width: 220px; height: 40px;">
                 Export Pops KML
             </button>

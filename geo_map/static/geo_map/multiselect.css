@@ -1,3 +1,9 @@
+.select-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
 .multiselect-dropdown {
   display: inline-block;
   padding: 0;
@@ -87,20 +93,12 @@ input[type="checkbox"] {
   font-size: 16px !important;
 }
 
-@media (max-width: 780px) {
-  .actions-container {
-    display: flex;
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 770px) {
+@media (max-width: 710px) {
   .actions-container {
     display: grid;
     grid-template-columns: 1fr !important;
   }
 }
-
 
 .ts-wrapper:not(.form-control, .form-select) {
   display: none !important;
