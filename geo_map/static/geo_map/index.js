@@ -8,22 +8,20 @@ const mapContainer = document.querySelector("#map");
 const baseURL = window.location.origin;
 const loader = document.getElementById("loader");
 const container = document.getElementById("container");
+const providerSelect = document.getElementById("provider-select");
+const linkStatusSelect = document.getElementById("fiber-link-status");
+const statusSelect = document.getElementById("status-select");
+const groupSelect = document.getElementById("group-select");
+const exportButton = document.getElementById("export-kml");
+const pageContent = document.getElementById("page-content");
 
 function setMapHeight() {
-  mapContainer.style.height = content.clientHeight + "px";
+  mapContainer.style.height = pageContent.clientHeight + "px";
 }
 setMapHeight();
 window.addEventListener("resize", setMapHeight);
 
-function initMap() {
-  const providerSelect = document.getElementById("providerSelect");
-  const linkStatusSelect = document.getElementById("fiberLinkStatus");
-  const statusSelect = document.getElementById("statusSelect");
-  const groupSelect = document.getElementById("groupSelect");
-
-  const actions = document.getElementById("actions");
-  const actionsContent = document.getElementById("actions-content");
-
+async function initMap() {
   let selectedTenants = [];
   let selectedLinkStatuses = [];
   let selectedStatuses = [];
@@ -71,7 +69,7 @@ function initMap() {
       fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
     }, 1000)
   );
-  
+
   providerSelect.addEventListener(
     "change",
     debounce(function () {
@@ -86,21 +84,8 @@ function initMap() {
     }, 1000)
   );
 
-  actions.addEventListener("click", function (event) {
-    actionsContent.style.display = "block";
-    actions.disabled = true;
-    event.stopPropagation();
-  });
-  actionsContent.addEventListener("click", function () {
+  exportButton.addEventListener("click", function () {
     exportKML(allSites);
-    actionsContent.style.display = "none";
-    actions.disabled = false;
-  });
-  document.addEventListener("click", function (event) {
-    if (!actionsContent.contains(event.target)) {
-      actionsContent.style.display = "none";
-      actions.disabled = false;
-    }
   });
   fetchDataAndCreateMap(
     selectedStatuses,
@@ -135,6 +120,7 @@ function combineData(linksArray, sitesArray) {
   });
   return combinedData;
 }
+
 function visualizeCombinedData(
   combinedData,
   selectedLinkStatuses,
@@ -205,6 +191,7 @@ function fetchDataAndCreateMap(
       const mapOptions = {
         center: centerCoordinates,
         zoom: 6,
+        mapId: "Netbox_MAP_ID",
       };
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
       zoom = map.getZoom();
@@ -259,35 +246,82 @@ function fetchDataAndCreateMap(
       container.style.display = "block";
     });
 }
-function addMarker(data) {
+
+async function addMarker(data) {
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
   if (data.location.lat === 0 || data.location.lng === 0) return;
-  const image = {
-    url: data.icon,
-    scaledSize: new google.maps.Size(12, 12),
-    origin: new google.maps.Point(0, 0),
-    anchor: new google.maps.Point(7, 7),
-  };
-  const marker = new google.maps.Marker({
+
+  const markerElement = document.createElement("img");
+  markerElement.src = data.icon;
+
+  const marker = new AdvancedMarkerElement({
     position: new google.maps.LatLng(
       parseFloat(data.location.lat),
       parseFloat(data.location.lng)
     ),
     map: map,
-    icon: image,
-    optimized: true,
+    content: markerElement,
+    gmpClickable: true,
   });
+
   if (data.content) {
+    const infoWindowContent = document.createElement("div");
+    infoWindowContent.style.paddingBottom = "10px";
+    infoWindowContent.style.color = "black";
+    infoWindowContent.style.paddingRight = "20px";
+    infoWindowContent.innerHTML = data.content;
     const infoWindow = new google.maps.InfoWindow({
-      content: data.content,
+      content: infoWindowContent,
     });
     marker.addListener("click", () => {
-      infoWindow.open(map, marker);
+      infoWindow.open({
+        anchor: marker,
+        map: map,
+        shouldFocus: false,
+      });
+    });
+    marker.content.addEventListener("click", () => {
+      infoWindow.open({
+        anchor: marker,
+        map: map,
+        shouldFocus: false,
+      });
+    });
+
+    marker.addListener("mouseover", () => {
+      infoWindow.open({
+        anchor: marker,
+        map: map,
+        shouldFocus: false,
+      });
+    });
+
+    marker.content.addEventListener("mouseover", () => {
+      infoWindow.open({
+        anchor: marker,
+        map: map,
+        shouldFocus: false,
+      });
+    });
+
+    marker.content.addEventListener("mouseout", () => {
+      setTimeout(() => {
+        infoWindow.close();
+      }, 2000);
     });
   }
 }
+
 function generateSiteHTML(site) {
-  return "<a target='_blank' href=" + site.url + ">" + site.name + "</a>";
+  return (
+    "<a target='_blank' style='color:black;' href=" +
+    site.url +
+    ">" +
+    site.name +
+    "</a>"
+  );
 }
+
 function drawPolyline(terminations, connection) {
   const lineSymbolPath = {
     active: [
@@ -297,7 +331,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,1 0,-1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1.5,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -311,7 +345,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1.5,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -325,7 +359,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1.5,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -339,7 +373,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-5 0,5",
           strokeOpacity: 1,
           scale: 1,
-          strokeWeight: 1.5,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -353,7 +387,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1.5,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -364,7 +398,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1.5,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -378,7 +412,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,3 0,2",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1.5,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -389,7 +423,7 @@ function drawPolyline(terminations, connection) {
           path: "M 0,-2 0,1",
           strokeOpacity: 1,
           scale: 2,
-          strokeWeight: 1.5,
+          strokeWeight: 3,
           strokeColor: connection.color,
         },
         offset: "0",
@@ -419,6 +453,7 @@ function clearDisplayedPolylines() {
   }
   displayedPolylines.length = 0;
 }
+
 function calculateCenter(data) {
   const totalSites = data.length;
   const sumLat = data.reduce((sum, site) => sum + site.latitude, 0);
@@ -431,6 +466,7 @@ function calculateCenter(data) {
   }
   return { lat: averageLat, lng: averageLng };
 }
+
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -442,4 +478,5 @@ function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
+
 window.initMap = initMap;

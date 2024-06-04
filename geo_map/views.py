@@ -28,7 +28,7 @@ class GeoMapHomeView(PermissionRequiredMixin, View):
 
         return render(
             request,
-            "index.html",
+            "index.html.j2",
             {
                 "google_maps_key": CONFIG["google_maps_key"],
                 "site_statuses": [

@@ -1,0 +1,63 @@
+{% extends 'base/layout.html' %}
+{% load static %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'geo_map/multiselect.css' %}">
+{% endblock head %}
+{% block content %}
+<div class="relative" id="container">
+    <div class="actions-container bg-surface-secondary grid mb-3"
+        style="display: grid; grid-template-columns: 460px 220px; gap: 8px; justify-content: space-between; ">
+
+        <div class="select-container">
+
+            <select name="provider-select" id="provider-select" multiple multiselect-search="true"
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Vendor">
+                {% for provider in providers %}
+                <option value="{{provider.value}}" data-color="{{provider.color}}">{{provider.label}}</option>
+                {% endfor %}
+            </select>
+            <select name="fiber-link-status" id="fiber-link-status" multiple multiselect-search="true"
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Fiber Link Status">
+                {% for status in link_statuses %}
+                <option value="{{status.value}}">{{status.label}}</option>
+                {% endfor %}
+            </select>
+
+            <select name="status-select" id="status-select" multiple multiselect-search="true"
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Status">
+                {% for status in site_statuses %}
+                <option value="{{status.value}}">{{status.label}}</option>
+                {% endfor %}
+            </select>
+            <select name="group-select" id="group-select" multiple multiselect-search="true"
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Groups">
+                {% for group in site_groups %}
+                <option value="{{group.label}}" {% if group.label == "Pit" %} selected class="checked" {% endif %}>
+                    {{group.label}}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="grid-col-1" style="display:grid; align-self:end;">
+            <button id="export-kml" class="btn" style="width: 220px; height: 40px;">
+                Export Pops KML
+            </button>
+        </div>
+    </div>
+
+    <div id="map" style="height: 400px; width: 100%; position:relative;"></div>
+</div>
+<div id="loader" class="position-absolute top-50 start-50 translate-middle d-block">
+    <div class="spinner-border text-primary" role="status" style="width: 5em; height: 5em;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+{% endblock content %}
+{% block javascript %}
+<script src="{% static 'geo_map/kml.js' %}"></script>
+<script src="{% static 'geo_map/index.js' %}"></script>
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap&libraries=marker"></script>
+<script src="{% static 'geo_map/multiselect.js' %}"></script>
+{% endblock %}
