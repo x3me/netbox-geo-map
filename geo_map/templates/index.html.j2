@@ -11,26 +11,26 @@
         <div class="select-container">
 
             <select name="provider-select" id="provider-select" multiple multiselect-search="true"
-                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Vendor">
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Vendor">
                 {% for provider in providers %}
                 <option value="{{provider.value}}" data-color="{{provider.color}}">{{provider.label}}</option>
                 {% endfor %}
             </select>
             <select name="fiber-link-status" id="fiber-link-status" multiple multiselect-search="true"
-                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by Fiber Link Status">
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="Fiber Link Status">
                 {% for status in link_statuses %}
                 <option value="{{status.value}}">{{status.label}}</option>
                 {% endfor %}
             </select>
 
             <select name="status-select" id="status-select" multiple multiselect-search="true"
-                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Status">
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="POP Status">
                 {% for status in site_statuses %}
                 <option value="{{status.value}}">{{status.label}}</option>
                 {% endfor %}
             </select>
             <select name="group-select" id="group-select" multiple multiselect-search="true"
-                multiselect-select-all="true" multiselect-max-items="3" placeholder="Filter by POP Groups">
+                multiselect-select-all="true" multiselect-max-items="3" placeholder="POP Groups">
                 {% for group in site_groups %}
                 <option value="{{group.label}}" {% if group.label == "Pit" %} selected class="checked" {% endif %}>
                     {{group.label}}
