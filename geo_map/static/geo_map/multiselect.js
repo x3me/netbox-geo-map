@@ -171,9 +171,6 @@ function MultiselectDropdown(options) {
           div.appendChild(
             newEl("span", {
               class: ["optext", "maxselected"],
-              style: {
-                backgroundColor: "rgba(84, 96, 116, 0.2)",
-              },
               text: el.attributes["placeholder"]?.value,
             })
           );
@@ -182,17 +179,16 @@ function MultiselectDropdown(options) {
             div.listEl.style.display === "none" ||
             div.listEl.style.display === ""
           ) {
-            let clearBtn = newEl("span", {
-              class: ["clear-selection"],
+            let clearBtn = newEl("button", {
+              class: ["clear-selection", "bg-surface-primary"],
               style: {
                 position: "absolute",
                 top: "-6px",
                 right: "-6px",
-                backgroundColor: "rgba(24, 36, 51, 1)",
                 border: "1px solid rgba(84, 96, 116)",
                 borderRadius: "50%",
                 width: "12px",
-                height: "12px",
+                height: "14px",
                 display: "flex",
                 alignItems: "flex-end",
                 justifyContent: "center",
