@@ -173,6 +173,9 @@ function fetchDataAndCreateMap(
   selectedTenants,
   selectedLinkStatuses
 ) {
+  const currentZoom = map ? map.getZoom() : 6;
+  const currentCenter = map ? map.getCenter() : null;
+
   const API_CALL = new URL(baseURL + "/api/plugins/geo_map/sites/");
   if (selectedStatuses.length) {
     API_CALL.searchParams.set("status__in", selectedStatuses.join(","));
@@ -190,11 +193,14 @@ function fetchDataAndCreateMap(
       const centerCoordinates = calculateCenter(data);
       const mapOptions = {
         center: centerCoordinates,
-        zoom: 6,
+        zoom: currentZoom,
         mapId: "Netbox_MAP_ID",
       };
       map = new google.maps.Map(document.getElementById("map"), mapOptions);
-      zoom = map.getZoom();
+      if (currentCenter) {
+        map.setCenter(currentCenter);
+      }
+
       if (selectedTenants && selectedLinkStatuses) {
         const combinedData = combineData(allLinks, allSites);
         visualizeCombinedData(

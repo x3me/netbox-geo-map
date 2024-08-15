@@ -161,41 +161,62 @@ function MultiselectDropdown(options) {
 
       div.refresh = () => {
         div
-          .querySelectorAll("span.optext, span.dropdown-placeholder")
+          .querySelectorAll(
+            "span.optext, span.dropdown-placeholder, .clear-selection"
+          )
           .forEach((t) => div.removeChild(t));
         let sels = Array.from(el.selectedOptions);
-        if (sels.length > 1) {
+
+        if (sels.length > 0) {
           div.appendChild(
             newEl("span", {
               class: ["optext", "maxselected"],
-              text: sels.length + " " + config.txtSelected,
+              text: el.attributes["placeholder"]?.value,
             })
           );
-        } else {
-          sels.map((x) => {
-            let c = newEl("span", {
-              class: "optext",
-              text:
-                x.text.length > 19 ? x.text.substring(0, 19) + ".." : x.text,
-              srcOption: x,
+
+          if (
+            div.listEl.style.display === "none" ||
+            div.listEl.style.display === ""
+          ) {
+            let clearBtn = newEl("button", {
+              class: ["clear-selection", "bg-surface-primary"],
+              style: {
+                position: "absolute",
+                top: "-6px",
+                right: "-6px",
+                border: "1px solid rgba(84, 96, 116)",
+                borderRadius: "50%",
+                width: "12px",
+                height: "14px",
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "center",
+                cursor: "pointer",
+                fontSize: "8px",
+              },
+              text: "x",
+              onclick: (ev) => {
+                Array.from(el.options).forEach((option) => {
+                  option.selected = false;
+                });
+
+                list
+                  .querySelectorAll("input[type='checkbox']")
+                  .forEach((checkbox) => {
+                    checkbox.checked = false;
+                  });
+
+                el.dispatchEvent(new Event("change"));
+                div.refresh();
+
+                ev.stopPropagation();
+              },
             });
-            if (el.attributes["multiselect-hide-x"]?.value !== "true")
-              c.appendChild(
-                newEl("span", {
-                  class: "optdel",
-                  text: "x",
-                  title: config.txtRemove,
-                  onclick: (ev) => {
-                    c.srcOption.listitemEl.dispatchEvent(new Event("click"));
-                    div.refresh();
-                    ev.stopPropagation();
-                  },
-                })
-              );
-            div.appendChild(c);
-          });
-        }
-        if (0 == el.selectedOptions.length)
+
+            div.appendChild(clearBtn);
+          }
+        } else {
           div.appendChild(
             newEl("span", {
               class: ["dropdown-placeholder"],
@@ -203,7 +224,9 @@ function MultiselectDropdown(options) {
               text: el.attributes["placeholder"]?.value ?? config.placeholder,
             })
           );
+        }
       };
+
       div.refresh();
     };
     el.loadOptions();
@@ -225,11 +248,16 @@ function MultiselectDropdown(options) {
       div.listEl.style.display = "block";
       search.focus();
       search.select();
+
+      div.querySelectorAll(".clear-selection").forEach((btn) => {
+        btn.style.display = "none";
+      });
     });
 
     document.addEventListener("click", function (event) {
       if (!div.contains(event.target)) {
         listWrap.style.display = "none";
+
         div.refresh();
       }
     });
