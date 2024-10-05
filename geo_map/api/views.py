@@ -6,7 +6,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from circuits.models import Circuit, Provider
 from .serializers import CircuitSerializer, SiteSerializer, ProviderSerializer
-
+from django.core.cache import cache
+from rest_framework.response import Response
+from django.core.cache import cache
 
 class ListModelMixin:
     """
@@ -66,15 +68,34 @@ class LinkViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
 
 class ProviderViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
     permission_required = "circuits.view_circuit"
-
-    queryset = Provider.objects.all()
     serializer_class = ProviderSerializer
 
-    # def get_queryset(self):
-    #     qs = super().get_queryset()
+    def list(self, request, *args, **kwargs):
+        cached_providers = cache.get('cached_providers')
 
-    #     qs = qs.exclude(termination_a__site__isnull=True)
-    #     qs = qs.exclude(termination_z__site__isnull=True)
-    #     qs = qs.exclude(provider__isnull=True)
+        if cached_providers is None:
+            queryset = Provider.objects.all()
+            serialized_providers = ProviderSerializer(queryset, many=True).data
 
-    #     return qs
+            cached_providers = serialized_providers
+            cache.set('cached_providers', cached_providers, 1800)  # Cache for 30 minutes
+
+        return Response(cached_providers)
+
+
+class ProviderViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
+    permission_required = "circuits.view_circuit"
+    serializer_class = ProviderSerializer
+
+    def get_queryset(self):
+        return Provider.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        cached_providers = cache.get('cached_providers')
+        if cached_providers is None:
+            queryset = self.get_queryset()
+            serialized_providers = ProviderSerializer(queryset, many=True).data
+            cached_providers = serialized_providers
+            cache.set('cached_providers', cached_providers, 1800)  # Cache for 30 minutes
+        return Response(cached_providers)
+

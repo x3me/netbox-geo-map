@@ -25,7 +25,7 @@
                 {% endfor %}
                 </select>
              <select name="city-select" id="city-select"  multiple multiselect-search="true"
-                multiselect-select-all="true" multiselect-max-items="3"  placeholder="City">
+                  placeholder="City">
                 {% for region in regions %}
                  <option value="{{region.value}}">
                      {{region.label}}

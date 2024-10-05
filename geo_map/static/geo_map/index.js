@@ -2,7 +2,6 @@ let map;
 let zoom;
 let allSites = [];
 let allLinks = [];
-const selectedCityId = null;
 let selectedCitySites = [];
 let displayedPolylines = [];
 let initialLoad = true;
@@ -39,7 +38,7 @@ async function initMap() {
 
   citySelect.addEventListener(
     "change",
-    debounce(function () {
+    debounce(function () {      
       selectedFiberLinkStatuses = ["active"];
       selectedCitySites = [];
       if (!citySelect.value) {
