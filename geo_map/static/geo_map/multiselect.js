@@ -8,6 +8,7 @@ function MultiselectDropdown(options) {
     txtSearch: "Search ",
     ...options,
   };
+
   function newEl(tag, attrs) {
     let e = document.createElement(tag);
     if (attrs !== undefined)
@@ -30,6 +31,7 @@ function MultiselectDropdown(options) {
       });
     return e;
   }
+
   document.querySelectorAll("select[multiple]").forEach((el, k) => {
     let div = newEl("div", {
       class: ["multiselect-dropdown", "btn"],
@@ -38,11 +40,14 @@ function MultiselectDropdown(options) {
         padding: config.style?.padding ?? "",
       },
     });
+
     el.style.display = "block";
     el.parentNode.insertBefore(div, el.nextSibling);
+
     let listWrap = newEl("div", {
       class: ["multiselect-dropdown-list-wrapper", "bg-surface-secondary"],
     });
+
     let list = newEl("div", {
       class: [
         "multiselect-dropdown-list",
@@ -51,6 +56,7 @@ function MultiselectDropdown(options) {
       ],
       style: { height: config.height },
     });
+
     let search = newEl("input", {
       class: ["multiselect-dropdown-search"].concat([
         config.searchInput?.class ?? "form-control",
@@ -64,6 +70,7 @@ function MultiselectDropdown(options) {
       },
       placeholder: config.txtSearch,
     });
+
     listWrap.appendChild(search);
     div.appendChild(listWrap);
     listWrap.appendChild(list);
@@ -71,48 +78,41 @@ function MultiselectDropdown(options) {
     el.loadOptions = () => {
       list.innerHTML = "";
 
+      let selectAllOption = null;
+
       if (el.attributes["multiselect-select-all"]?.value == "true") {
         let op = newEl("div", { class: "multiselect-dropdown-all-selector" });
         let ic = newEl("input", {
           type: "checkbox",
         });
+
         op.appendChild(ic);
         op.appendChild(newEl("label", { text: config.txtAll }));
+
         op.addEventListener("click", () => {
-          op.classList.toggle("checked");
-          op.querySelector("input").checked =
-            !op.querySelector("input").checked;
-          let ch = op.querySelector("input").checked;
+          const checked = !op.classList.contains("checked");
+          op.classList.toggle("checked", checked);
+          op.querySelector("input").checked = checked;
+
           list
             .querySelectorAll(
               ":scope > div:not(.multiselect-dropdown-all-selector)"
             )
             .forEach((i) => {
               if (i.style.display !== "none") {
-                i.querySelector("input").checked = ch;
-                i.optEl.selected = ch;
+                i.querySelector("input").checked = checked;
+                i.optEl.selected = checked;
               }
             });
 
           el.dispatchEvent(new Event("change"));
         });
+
         ic.addEventListener("click", (ev) => {
           ic.checked = !ic.checked;
         });
-        el.addEventListener("change", (ev) => {
-          let itms = Array.from(
-            list.querySelectorAll(
-              ":scope > div:not(.multiselect-dropdown-all-selector)"
-            )
-          ).filter((e) => e.style.display !== "none");
-          let existsNotSelected = itms.find(
-            (i) => !i.querySelector("input").checked
-          );
-          if (ic.checked && existsNotSelected) ic.checked = false;
-          else if (ic.checked == false && existsNotSelected === undefined)
-            ic.checked = true;
-        });
 
+        selectAllOption = op;
         list.appendChild(op);
       }
 
@@ -125,7 +125,9 @@ function MultiselectDropdown(options) {
           type: "checkbox",
           checked: o.selected,
         });
+
         op.appendChild(ic);
+
         if (el.id === "provider-select") {
           const { color } = o.dataset;
           let colorSquare = newEl("div", {
@@ -144,19 +146,23 @@ function MultiselectDropdown(options) {
         }
 
         op.appendChild(newEl("label", { text: o.text }));
+
         op.addEventListener("click", () => {
           op.classList.toggle("checked");
-          op.querySelector("input").checked =
-            !op.querySelector("input").checked;
+          op.querySelector("input").checked = !op.querySelector("input").checked;
           op.optEl.selected = !!!op.optEl.selected;
           el.dispatchEvent(new Event("change"));
+          updateSelectAllState();
         });
+
         ic.addEventListener("click", (ev) => {
           ic.checked = !ic.checked;
         });
+
         o.listitemEl = op;
         list.appendChild(op);
       });
+
       div.listEl = listWrap;
 
       div.refresh = () => {
@@ -228,7 +234,21 @@ function MultiselectDropdown(options) {
       };
 
       div.refresh();
+
+      function updateSelectAllState() {
+        if (!selectAllOption) return;
+
+        const totalItems = list.querySelectorAll(":scope > div:not(.multiselect-dropdown-all-selector)").length;
+        const selectedItems = list.querySelectorAll(":scope > div.checked").length;
+
+        const isAllSelected = selectedItems === totalItems;
+        selectAllOption.classList.toggle("checked", isAllSelected);
+        selectAllOption.querySelector("input").checked = isAllSelected;
+      }
+
+      updateSelectAllState();
     };
+
     el.loadOptions();
 
     search.addEventListener("input", () => {
@@ -244,6 +264,7 @@ function MultiselectDropdown(options) {
               : "flex";
         });
     });
+
     div.addEventListener("click", () => {
       div.listEl.style.display = "block";
       search.focus();
@@ -257,7 +278,6 @@ function MultiselectDropdown(options) {
     document.addEventListener("click", function (event) {
       if (!div.contains(event.target)) {
         listWrap.style.display = "none";
-
         div.refresh();
       }
     });

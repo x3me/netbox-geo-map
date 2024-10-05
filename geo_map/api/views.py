@@ -4,8 +4,8 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django_filters import rest_framework as filters
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-
-from .serializers import CircuitSerializer, SiteSerializer
+from circuits.models import Circuit, Provider
+from .serializers import CircuitSerializer, SiteSerializer, ProviderSerializer
 
 
 class ListModelMixin:
@@ -62,3 +62,19 @@ class LinkViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
         qs = qs.exclude(provider__isnull=True)
 
         return qs
+
+
+class ProviderViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
+    permission_required = "circuits.view_circuit"
+
+    queryset = Provider.objects.all()
+    serializer_class = ProviderSerializer
+
+    # def get_queryset(self):
+    #     qs = super().get_queryset()
+
+    #     qs = qs.exclude(termination_a__site__isnull=True)
+    #     qs = qs.exclude(termination_z__site__isnull=True)
+    #     qs = qs.exclude(provider__isnull=True)
+
+    #     return qs
