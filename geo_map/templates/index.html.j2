@@ -69,6 +69,7 @@
 {% endblock content %}
 {% block javascript %}
 <script src="{% static 'geo_map/kml.js' %}"></script>
+<script src="{% static 'geo_map/helpers.js' %}"></script>
 <script src="{% static 'geo_map/index.js' %}"></script>
 <script async
     src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap&libraries=marker"></script>

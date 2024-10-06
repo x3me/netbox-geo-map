@@ -4,7 +4,11 @@ let allSites = [];
 let allLinks = [];
 let selectedCitySites = [];
 let displayedPolylines = [];
+let displayedMarkers = [];
+
 let initialLoad = true;
+let storedMapCenter = null;
+let storedZoomLevel = null;
 
 const content = document.querySelector("#content");
 const mapContainer = document.querySelector("#map");
@@ -38,16 +42,71 @@ async function initMap() {
 
   citySelect.addEventListener(
     "change",
-    debounce(function () {      
+    debounce(function () {
       selectedFiberLinkStatuses = ["active"];
       selectedCitySites = [];
       if (!citySelect.value) {
         clearDisplayedPolylines();
+        clearDisplayedMarkers();
+        if (storedMapCenter && storedZoomLevel) {
+          map.setCenter(storedMapCenter);
+          map.setZoom(storedZoomLevel);
+
+          selectedFiberLinkStatuses = [];
+          selectedPopsStatuses = [];
+          selectedGroups = [];
+          selectedTenants = [];
+
+          Array.from(providerSelect.options).forEach((option) => {
+            option.selected = false;
+          });
+
+          Array.from(fiberLinkSelect.options).forEach((option) => {
+            option.selected = false;
+          });
+
+          Array.from(popsStatusSelect.options).forEach((option) => {
+            option.selected = false;
+          });
+
+          Array.from(groupSelect.options).forEach((option) => {
+            option.selected = false;
+          });
+
+          if (providerSelect.loadOptions) providerSelect.loadOptions();
+          if (fiberLinkSelect.loadOptions) fiberLinkSelect.loadOptions();
+          if (popsStatusSelect.loadOptions) popsStatusSelect.loadOptions();
+          if (groupSelect.loadOptions) groupSelect.loadOptions();
+        }
+
         return;
       }
+
+      selectedFiberLinkStatuses = ["active"];
+      selectedPopsStatuses = ["active"];
+      selectedGroups = ["access", "core", "distribution", "pit"];
+      Array.from(fiberLinkSelect.options).forEach((option) => {
+        option.selected = option.value === "active";
+      });
+      Array.from(popsStatusSelect.options).forEach((option) => {
+        option.selected = option.value === "active";
+      });
+      Array.from(groupSelect.options).forEach((option) => {
+        option.selected = true;
+      });
+
+      if (fiberLinkSelect.loadOptions) fiberLinkSelect.loadOptions();
+      if (popsStatusSelect.loadOptions) popsStatusSelect.loadOptions();
+      if (groupSelect.loadOptions) groupSelect.loadOptions();
+
       const selectedCity = citySelect.value;
       selectedCity &&
-        fetchSitesByRegion(selectedCity, selectedFiberLinkStatuses);
+        fetchSitesByRegion(
+          selectedCity,
+          selectedFiberLinkStatuses,
+          selectedPopsStatuses,
+          selectedGroups
+        );
     }, 1000)
   );
 
@@ -206,7 +265,12 @@ function fetchAndDrawPolylinesOnMap(
     });
 }
 
-function fetchSitesByRegion(regionId, selectedFiberLinkStatuses) {
+function fetchSitesByRegion(
+  regionId,
+  selectedFiberLinkStatuses,
+  selectedPopsStatuses,
+  selectedGroups
+) {
   const CALL = new URL(baseURL + "/api/dcim/sites/");
   CALL.searchParams.set("region_id", regionId);
   let arr = [];
@@ -232,6 +296,9 @@ function fetchSitesByRegion(regionId, selectedFiberLinkStatuses) {
         map.setCenter(siteCoordinates[0]);
         map.setZoom(13);
       }
+
+      clearDisplayedMarkers();
+
       allLinks.map((link) => {
         const { termination_a_site, termination_z_site } = link;
         d.results.map((site) => {
@@ -263,14 +330,12 @@ function fetchSitesByRegion(regionId, selectedFiberLinkStatuses) {
         .then((response) => response.json())
         .then((data) => {
           allVendors = JSON.parse(JSON.stringify(data));
-          let newlySelectedTenantsByRegion = allVendors.filter(
+          let povidersByRegion = allVendors.filter(
             (vendor) =>
               vendor.regions.length && vendor.regions.includes(Number(regionId))
           );
 
-          selectedTenants = newlySelectedTenantsByRegion.map((tenant) =>
-            String(tenant.id)
-          );
+          selectedTenants = povidersByRegion.map((tenant) => String(tenant.id));
 
           Array.from(providerSelect.options).forEach((option) => {
             option.selected = false;
@@ -301,6 +366,41 @@ function fetchSitesByRegion(regionId, selectedFiberLinkStatuses) {
             selectedFiberLinkStatuses,
             selectedTenants
           );
+
+          if (selectedPopsStatuses.length && selectedGroups.length) {
+            d.forEach((site) => {
+              if (
+                selectedGroups.includes(site.group) &&
+                selectedPopsStatuses.includes(site.status)
+              ) {
+                addMarker({
+                  location: { lat: site.latitude, lng: site.longitude },
+                  icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
+                  content: generateSiteHTML(site),
+                });
+              }
+            });
+          } else if (selectedPopsStatuses.length) {
+            d.forEach((site) => {
+              if (selectedPopsStatuses.includes(site.status)) {
+                addMarker({
+                  location: { lat: site.latitude, lng: site.longitude },
+                  icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
+                  content: generateSiteHTML(site),
+                });
+              }
+            });
+          } else if (selectedGroups.length) {
+            d.forEach((site) => {
+              if (selectedGroups.includes(site.group)) {
+                addMarker({
+                  location: { lat: site.latitude, lng: site.longitude },
+                  icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
+                  content: generateSiteHTML(site),
+                });
+              }
+            });
+          }
         })
         .catch((error) => {
           console.error("Error fetching provider data:", error);
@@ -319,7 +419,8 @@ function fetchDataAndCreateMap(
 ) {
   const currentZoom = map ? map.getZoom() : 6;
   const currentCenter = map ? map.getCenter() : null;
-
+  storedMapCenter = currentCenter;
+  storedZoomLevel = currentZoom;
   const API_CALL = new URL(baseURL + "/api/plugins/geo_map/sites/");
   if (selectedPopsStatuses.length) {
     API_CALL.searchParams.set("status__in", selectedPopsStatuses.join(","));
@@ -335,6 +436,7 @@ function fetchDataAndCreateMap(
     .then((data) => {
       allSites = JSON.parse(JSON.stringify(data));
       const centerCoordinates = calculateCenter(data);
+      if (!currentCenter) storedMapCenter = centerCoordinates;
       const mapOptions = {
         center: centerCoordinates,
         zoom: currentZoom,
@@ -414,6 +516,8 @@ async function addMarker(data) {
     gmpClickable: true,
   });
 
+  displayedMarkers.push(marker);
+
   if (data.content) {
     const infoWindowContent = document.createElement("div");
     infoWindowContent.style.paddingBottom = "10px";
@@ -462,178 +566,11 @@ async function addMarker(data) {
   }
 }
 
-function generateSiteHTML(site) {
-  return (
-    "<a target='_blank' style='color:black;' href=" +
-    site.url +
-    ">" +
-    site.name +
-    "</a>"
-  );
-}
-
-function drawPolyline(terminations, connection) {
-  const lineSymbolPath = {
-    active: [
-      {
-        //solid line
-        icon: {
-          path: "M 0,1 0,-1",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "1px",
-      },
-    ],
-    planned: [
-      {
-        //dashed line
-        icon: {
-          path: "M 0,-2 0,1",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "15px",
-      },
-    ],
-    offline: [
-      {
-        //dotted line
-        icon: {
-          path: "M 0,3 0,2",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "10px",
-      },
-    ],
-    provisioning: [
-      {
-        //longdash
-        icon: {
-          path: "M 0,-5 0,5",
-          strokeOpacity: 1,
-          scale: 1,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "30px",
-      },
-    ],
-    decommissioned: [
-      {
-        //twodash
-        icon: {
-          path: "M 0,3 0,2",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "15px",
-      },
-      {
-        icon: {
-          path: "M 0,-2 0,1",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "15px",
-      },
-    ],
-    deprovisioning: [
-      {
-        //dotdash
-        icon: {
-          path: "M 0,3 0,2",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "10px",
-      },
-      {
-        icon: {
-          path: "M 0,-2 0,1",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "20px",
-      },
-    ],
-  };
-  const paths = terminations.map((t) => {
-    if (t.latitude === 0 || t.longitude === 0) return null;
-    return { lat: t.latitude, lng: t.longitude };
+function clearDisplayedMarkers() {
+  displayedMarkers.forEach((marker) => {
+    marker.setMap(null);
   });
-  if (connection.status && !paths.includes(null)) {
-    const polyline = new google.maps.Polyline({
-      path: paths,
-      geodesic: true,
-      strokeOpacity: 0,
-      icons: [...lineSymbolPath[connection.status]],
-    });
-    polyline.setMap(map);
-    displayedPolylines.push(polyline);
-  }
-}
-
-function clearDisplayedPolylines() {
-  for (const polyline of displayedPolylines) {
-    polyline.setMap(null);
-  }
-  displayedPolylines.length = 0;
-}
-
-function calculateCenter(data) {
-  const totalSites = data.length;
-  const sumLat = data.reduce((sum, site) => sum + site.latitude, 0);
-  const sumLng = data.reduce((sum, site) => sum + site.longitude, 0);
-  const averageLat = sumLat / totalSites;
-  const averageLng = sumLng / totalSites;
-
-  if (isNaN(averageLat) || isNaN(averageLng)) {
-    return { lat: 23.5, lng: 78.6677428 };
-  }
-  return { lat: averageLat, lng: averageLng };
-}
-
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      timeout = null;
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
-
-function calculateCenterBetweenTwoSites(site1, site2) {
-  const centerLat = (site1.lat + site2.lat) / 2;
-  const centerLng = (site1.lng + site2.lng) / 2;
-
-  return { lat: centerLat, lng: centerLng };
+  displayedMarkers = [];
 }
 
 window.initMap = initMap;
