@@ -145,93 +145,114 @@ function MultiselectDropdown(options) {
           op.appendChild(colorSquare);
         }
 
-        op.appendChild(newEl("label", { text: o.text }));
+        
+      op.appendChild(newEl("label", { text: o.text }));
 
-        op.addEventListener("click", () => {
+      op.addEventListener("click", () => {
+        // Modify behavior only for the city-select dropdown
+        if (el.id === "city-select") {
+          // Deselect all other options
+          Array.from(el.options).forEach((opt) => (opt.selected = false));
+          // Select only the current option
+          o.selected = true;
+
+          // Update the checkboxes in the list
+          list
+            .querySelectorAll(":scope > div")
+            .forEach((div) => div.classList.remove("checked"));
+          op.classList.add("checked");
+
+          list
+            .querySelectorAll("input[type='checkbox']")
+            .forEach((checkbox) => (checkbox.checked = false));
+          ic.checked = true;
+        } else {
           op.classList.toggle("checked");
-          op.querySelector("input").checked = !op.querySelector("input").checked;
-          op.optEl.selected = !!!op.optEl.selected;
-          el.dispatchEvent(new Event("change"));
-          updateSelectAllState();
-        });
-
-        ic.addEventListener("click", (ev) => {
           ic.checked = !ic.checked;
-        });
+          o.selected = !!!o.selected;
+        }
 
-        o.listitemEl = op;
-        list.appendChild(op);
+        el.dispatchEvent(new Event("change"));
+        updateSelectAllState();
       });
 
-      div.listEl = listWrap;
+      ic.addEventListener("click", (ev) => {
+        ic.checked = !ic.checked;
+      });
 
-      div.refresh = () => {
-        div
-          .querySelectorAll(
-            "span.optext, span.dropdown-placeholder, .clear-selection"
-          )
-          .forEach((t) => div.removeChild(t));
-        let sels = Array.from(el.selectedOptions);
+      o.listitemEl = op;
+      list.appendChild(op);
+    });
 
-        if (sels.length > 0) {
-          div.appendChild(
-            newEl("span", {
-              class: ["optext", "maxselected"],
-              text: el.attributes["placeholder"]?.value,
-            })
-          );
+    div.listEl = listWrap;
 
-          if (
-            div.listEl.style.display === "none" ||
-            div.listEl.style.display === ""
-          ) {
-            let clearBtn = newEl("button", {
-              class: ["clear-selection", "bg-surface-primary"],
-              style: {
-                position: "absolute",
-                top: "-6px",
-                right: "-6px",
-                border: "1px solid rgba(84, 96, 116)",
-                borderRadius: "50%",
-                width: "12px",
-                height: "14px",
-                display: "flex",
-                alignItems: "flex-end",
-                justifyContent: "center",
-                cursor: "pointer",
-                fontSize: "8px",
-              },
-              text: "x",
-              onclick: (ev) => {
-                Array.from(el.options).forEach((option) => {
-                  option.selected = false;
+    div.refresh = () => {
+      div
+        .querySelectorAll(
+          "span.optext, span.dropdown-placeholder, .clear-selection"
+        )
+        .forEach((t) => div.removeChild(t));
+      let sels = Array.from(el.selectedOptions);
+
+      if (sels.length > 0) {
+        div.appendChild(
+          newEl("span", {
+            class: ["optext", "maxselected"],
+            text: el.attributes["placeholder"]?.value,
+          })
+        );
+
+        if (
+          div.listEl.style.display === "none" ||
+          div.listEl.style.display === ""
+        ) {
+          let clearBtn = newEl("button", {
+            class: ["clear-selection", "bg-surface-primary"],
+            style: {
+              position: "absolute",
+              top: "-6px",
+              right: "-6px",
+              border: "1px solid rgba(84, 96, 116)",
+              borderRadius: "50%",
+              width: "12px",
+              height: "14px",
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "center",
+              cursor: "pointer",
+              fontSize: "8px",
+            },
+            text: "x",
+            onclick: (ev) => {
+              Array.from(el.options).forEach((option) => {
+                option.selected = false;
+              });
+
+              list
+                .querySelectorAll("input[type='checkbox']")
+                .forEach((checkbox) => {
+                  checkbox.checked = false;
                 });
 
-                list
-                  .querySelectorAll("input[type='checkbox']")
-                  .forEach((checkbox) => {
-                    checkbox.checked = false;
-                  });
+              el.dispatchEvent(new Event("change"));
+              div.refresh();
 
-                el.dispatchEvent(new Event("change"));
-                div.refresh();
+              ev.stopPropagation();
+            },
+          });
 
-                ev.stopPropagation();
-              },
-            });
-
-            div.appendChild(clearBtn);
-          }
-        } else {
-          div.appendChild(
-            newEl("span", {
-              class: ["dropdown-placeholder"],
-              style: { display: el.selectedOptions.length ? "none" : "flex" },
-              text: el.attributes["placeholder"]?.value ?? config.placeholder,
-            })
-          );
+          div.appendChild(clearBtn);
         }
-      };
+      } else {
+        div.appendChild(
+          newEl("span", {
+            class: ["dropdown-placeholder"],
+            style: { display: el.selectedOptions.length ? "none" : "flex" },
+            text: el.attributes["placeholder"]?.value ?? config.placeholder,
+          })
+        );
+      }
+    };
 
       div.refresh();
 
