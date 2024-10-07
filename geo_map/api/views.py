@@ -73,11 +73,16 @@ class LinkViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
 
 
 class ProviderViewSet(ModelViewSet):
-    queryset = Provider.objects.all()
+    queryset = Provider.objects.annotate(circuit_count=Count("circuits"))
     serializer_class = ProviderSerializer
 
     def get_queryset(self):
-        return Provider.objects.all()
+        return (
+            Provider.objects.annotate(circuit_count=Count("circuits"))
+            .prefetch_related("circuits__terminations__site")
+            .filter(circuit_count__gt=0)
+            .order_by("name")
+        )
 
     def list(self, request, *args, **kwargs):
         cached_providers = cache.get("cached_providers")
@@ -85,28 +90,5 @@ class ProviderViewSet(ModelViewSet):
             queryset = self.get_queryset()
             serialized_providers = ProviderSerializer(queryset, many=True).data
             cached_providers = serialized_providers
-            cache.set(
-                "cached_providers", cached_providers, 1800
-            )  # Cache for 30 minutes
+            cache.set("cached_providers", cached_providers, 21600)  # Cache for 6 hours
         return Response(cached_providers)
-
-
-class ProviderListAPIView(APIView):
-    def get(self):
-        providers = (
-            Provider.objects.annotate(circuit_count=Count("circuits"))
-            .prefetch_related("circuits__terminations__site")
-            .filter(circuit_count__gt=0)
-            .order_by("name")
-        )
-
-        providers_data = [
-            {
-                "value": provider.id,
-                "label": provider.name,
-                "color": provider.cf.get("provider_color"),
-            }
-            for provider in providers
-        ]
-
-        return Response(providers_data)
