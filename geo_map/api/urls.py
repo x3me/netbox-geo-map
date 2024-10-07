@@ -6,6 +6,6 @@ router = NetBoxRouter()
 
 router.register("sites", SiteViewSet)
 router.register("links", LinkViewSet)
-router.register("providers", ProviderViewSet, basename="provider")
+router.register("providers", ProviderViewSet)
 
 urlpatterns = router.urls
