@@ -94,7 +94,6 @@ async function initMap() {
             { element: providerSelect },
             { element: fiberLinkSelect },
             { element: popsStatusSelect },
-            // { element: groupSelect },
           ]);
           Array.from(groupSelect.options).forEach((option) => {
             option.selected = false;

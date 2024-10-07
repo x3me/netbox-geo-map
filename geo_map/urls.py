@@ -5,9 +5,4 @@ from . import views
 
 urlpatterns = [
     path("", views.GeoMapHomeView.as_view(), name="home"),
-    path(
-        "api/plugins/geo_map/providers/",
-        ProviderViewSet.as_view({"get": "list"}),
-        name="provider-list-api",
-    ),
 ]

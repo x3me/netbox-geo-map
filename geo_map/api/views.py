@@ -73,22 +73,17 @@ class LinkViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
 
 
 class ProviderViewSet(ModelViewSet):
+    permission_required = "circuits.view_provider"
     queryset = Provider.objects.annotate(circuit_count=Count("circuits"))
     serializer_class = ProviderSerializer
 
-    def get_queryset(self):
-        return (
-            Provider.objects.annotate(circuit_count=Count("circuits"))
-            .prefetch_related("circuits__terminations__site")
-            .filter(circuit_count__gt=0)
-            .order_by("name")
-        )
-
+    
     def list(self, request, *args, **kwargs):
         cached_providers = cache.get("cached_providers")
         if cached_providers is None:
             queryset = self.get_queryset()
             serialized_providers = ProviderSerializer(queryset, many=True).data
             cached_providers = serialized_providers
-            cache.set("cached_providers", cached_providers, 21600)  # Cache for 6 hours
+            cache.set("cached_providers", cached_providers, 21600)
+
         return Response(cached_providers)
