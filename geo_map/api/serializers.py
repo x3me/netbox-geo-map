@@ -1,7 +1,7 @@
 from dcim.models import CableTermination, Site
 from netbox.api.serializers import NetBoxModelSerializer
 from rest_framework import serializers
-from circuits.models import Circuit
+from circuits.models import Circuit, Provider
 
 
 class SiteSerializer(NetBoxModelSerializer):
@@ -32,6 +32,7 @@ class TerminationSerializer(NetBoxModelSerializer):
             "site",
         )
 
+
 class CircuitSerializer(NetBoxModelSerializer):
     termination_a_site = serializers.IntegerField(source="termination_a.site_id")
     termination_z_site = serializers.IntegerField(source="termination_z.site_id")
@@ -49,4 +50,32 @@ class CircuitSerializer(NetBoxModelSerializer):
             "termination_a_site",
             "termination_z_site",
             "provider_color",
+        )
+
+
+class ProviderSerializer(NetBoxModelSerializer):
+    color = serializers.SerializerMethodField()
+    regions = serializers.SerializerMethodField()
+
+    def get_color(self, obj: Provider):
+        return obj.cf.get("provider_color")
+
+    def get_regions(self, obj: Provider):
+        return list(
+            set(
+                [
+                    termination.site.region_id
+                    for circuit in obj.circuits.all()
+                    for termination in circuit.terminations.all()
+                ]
+            )
+        )
+
+    class Meta:
+        model = Provider
+        fields = (
+            "id",
+            "name",
+            "color",
+            "regions",
         )

@@ -4,8 +4,16 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django_filters import rest_framework as filters
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-
-from .serializers import CircuitSerializer, SiteSerializer
+from circuits.models import Circuit, Provider
+from .serializers import CircuitSerializer, SiteSerializer, ProviderSerializer
+from django.core.cache import cache
+from rest_framework.response import Response
+from django.core.cache import cache
+from rest_framework.views import APIView
+from django.db.models import Count
+from rest_framework.viewsets import ModelViewSet
+from circuits.models import Provider
+from .serializers import ProviderSerializer
 
 
 class ListModelMixin:
@@ -62,3 +70,24 @@ class LinkViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
         qs = qs.exclude(provider__isnull=True)
 
         return qs
+
+
+class ProviderViewSet(ModelViewSet):
+    permission_required = "circuits.view_provider"
+    queryset = (
+        Provider.objects.annotate(circuit_count=Count("circuits"))
+        .prefetch_related("circuits__terminations__site")
+        .filter(circuit_count__gt=0)
+        .order_by("name")
+    )
+    serializer_class = ProviderSerializer
+
+    def list(self, request, *args, **kwargs):
+        cached_providers = cache.get("cached_providers")
+        if cached_providers is None:
+            queryset = self.get_queryset()
+            serialized_providers = ProviderSerializer(queryset, many=True).data
+            cached_providers = serialized_providers
+            cache.set("cached_providers", cached_providers, 21600)
+
+        return Response(cached_providers)

@@ -2,16 +2,28 @@ let map;
 let zoom;
 let allSites = [];
 let allLinks = [];
-const displayedPolylines = [];
+let selectedCitySites = [];
+let displayedPolylines = [];
+let displayedMarkers = [];
+
+let initialLoad = true;
+let storedMapCenter = null;
+let storedZoomLevel = null;
+
 const content = document.querySelector("#content");
 const mapContainer = document.querySelector("#map");
 const baseURL = window.location.origin;
+const PROVIDERS_API_CALL = new URL(baseURL + "/api/plugins/geo_map/providers/");
 const loader = document.getElementById("loader");
 const container = document.getElementById("container");
+
 const providerSelect = document.getElementById("provider-select");
-const linkStatusSelect = document.getElementById("fiber-link-status");
-const statusSelect = document.getElementById("status-select");
+let selectedTenants = [];
+
+const fiberLinkSelect = document.getElementById("fiber-link-status");
+const popsStatusSelect = document.getElementById("status-select");
 const groupSelect = document.getElementById("group-select");
+const citySelect = document.getElementById("city-select");
 const exportButton = document.getElementById("export-kml");
 const pageContent = document.getElementById("page-content");
 
@@ -21,58 +33,154 @@ function setMapHeight() {
 setMapHeight();
 window.addEventListener("resize", setMapHeight);
 
-async function initMap() {
-  let selectedTenants = [];
-  let selectedLinkStatuses = [];
-  let selectedStatuses = [];
-  let selectedGroups = ["pit"];
+function resetSelections(selectElements, defaults = {}) {
+  selectElements.forEach(({ element, value = null }) => {
+    Array.from(element.options).forEach((option) => {
+      option.selected = value ? option.value === value : false;
+    });
+    if (element.loadOptions) element.loadOptions();
+  });
+}
 
-  statusSelect.addEventListener(
+document.addEventListener("DOMContentLoaded", function () {
+  const providerSelect = document.getElementById("provider-select");
+  function fetchProviders() {
+    fetch(PROVIDERS_API_CALL)
+      .then((response) => response.json())
+      .then((providers) => {
+        providerSelect.innerHTML = "";
+        providers.forEach((provider) => {
+          const option = document.createElement("option");
+          option.value = provider.id;
+          option.text = provider.name;
+          option.selected = true;
+          option.dataset.color = provider.color;
+          providerSelect.appendChild(option);
+        });
+        if (providerSelect.loadOptions) {
+          providerSelect.loadOptions();
+        }
+        selectedTenants = providers.map((provider) => provider.value);
+        initMap();
+      })
+      .catch((error) => console.error("Error fetching providers:", error));
+  }
+  fetchProviders();
+});
+
+async function initMap() {
+  let selectedFiberLinkStatuses = ["active"];
+  let selectedPopsStatuses = ["active"];
+  let selectedGroups = ["access", "core", "distribution", "pit"];
+
+  citySelect.addEventListener(
     "change",
-    debounce(function () {
-      selectedStatuses = Array.from(statusSelect.selectedOptions).map(
+    debounce(() => {
+      selectedFiberLinkStatuses = ["active"];
+      selectedCitySites = [];
+      if (!citySelect.value) {
+        clearDisplayedPolylines();
+        clearDisplayedMarkers();
+        if (storedMapCenter && storedZoomLevel) {
+          map.setCenter(storedMapCenter);
+          map.setZoom(storedZoomLevel);
+
+          selectedFiberLinkStatuses = [];
+          selectedPopsStatuses = [];
+          selectedGroups = [];
+          selectedTenants = [];
+
+          resetSelections([
+            { element: providerSelect },
+            { element: fiberLinkSelect },
+            { element: popsStatusSelect },
+          ]);
+          Array.from(groupSelect.options).forEach((option) => {
+            option.selected = false;
+          });
+          if (groupSelect.loadOptions) groupSelect.loadOptions();
+          return;
+        }
+      }
+
+      selectedFiberLinkStatuses = ["active"];
+      selectedPopsStatuses = ["active"];
+      selectedGroups = ["access", "core", "distribution", "pit"];
+
+      resetSelections([
+        { element: fiberLinkSelect, value: "active" },
+        { element: popsStatusSelect, value: "active" },
+      ]);
+
+      Array.from(groupSelect.options).forEach((option) => {
+        option.selected = true;
+      });
+      if (groupSelect.loadOptions) groupSelect.loadOptions();
+
+      const selectedCity = citySelect.value;
+      if (selectedCity) {
+        fetchSitesByRegion(
+          selectedCity,
+          selectedFiberLinkStatuses,
+          selectedPopsStatuses,
+          selectedGroups
+        );
+      }
+    }, 1000)
+  );
+
+  popsStatusSelect.addEventListener(
+    "change",
+    debounce(() => {
+      selectedPopsStatuses = Array.from(popsStatusSelect.selectedOptions).map(
         (option) => option.value
       );
       fetchDataAndCreateMap(
-        selectedStatuses,
+        selectedPopsStatuses,
         selectedGroups,
         selectedTenants,
-        selectedLinkStatuses
+        selectedFiberLinkStatuses
       );
     }, 1000)
   );
+
   groupSelect.addEventListener(
     "change",
-    debounce(function () {
+    debounce(() => {
       selectedGroups = Array.from(groupSelect.selectedOptions).map((option) =>
         option.value.toLowerCase()
       );
       fetchDataAndCreateMap(
-        selectedStatuses,
+        selectedPopsStatuses,
         selectedGroups,
         selectedTenants,
-        selectedLinkStatuses
+        selectedFiberLinkStatuses
       );
     }, 1000)
   );
 
-  linkStatusSelect.addEventListener(
+  fiberLinkSelect.addEventListener(
     "change",
-    debounce(function () {
-      selectedLinkStatuses = Array.from(linkStatusSelect.selectedOptions).map(
-        (option) => option.value
-      );
-      if (!selectedLinkStatuses.length) {
+    debounce(() => {
+      selectedFiberLinkStatuses = Array.from(
+        fiberLinkSelect.selectedOptions
+      ).map((option) => option.value);
+      if (!selectedFiberLinkStatuses.length) {
         clearDisplayedPolylines();
         return;
       }
-      fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
+      fetchAndDrawPolylinesOnMap(
+        selectedTenants,
+        selectedFiberLinkStatuses,
+        selectedPopsStatuses,
+        selectedGroups
+      );
     }, 1000)
   );
 
   providerSelect.addEventListener(
     "change",
-    debounce(function () {
+    debounce(() => {
       selectedTenants = Array.from(providerSelect.selectedOptions).map(
         (option) => option.value
       );
@@ -80,24 +188,41 @@ async function initMap() {
         clearDisplayedPolylines();
         return;
       }
-      fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses);
+      fetchAndDrawPolylinesOnMap(
+        selectedTenants,
+        selectedFiberLinkStatuses,
+        selectedPopsStatuses,
+        selectedGroups
+      );
     }, 1000)
   );
 
-  exportButton.addEventListener("click", function () {
+  exportButton.addEventListener("click", () => {
     exportKML(allSites);
   });
+
   fetchDataAndCreateMap(
-    selectedStatuses,
+    selectedPopsStatuses,
     selectedGroups,
     selectedTenants,
-    selectedLinkStatuses
+    selectedFiberLinkStatuses
   );
+
+  if (initialLoad) {
+    initialLoad = false;
+    fetchAndDrawPolylinesOnMap(
+      selectedTenants,
+      selectedFiberLinkStatuses,
+      selectedPopsStatuses,
+      selectedGroups
+    );
+  }
 }
 
 function combineData(linksArray, sitesArray) {
   const combinedData = {};
   if (!linksArray.length || !sitesArray.length) return null;
+
   linksArray.forEach((connection) => {
     const {
       id,
@@ -118,37 +243,47 @@ function combineData(linksArray, sitesArray) {
     };
     combinedData[id] = combinedObject;
   });
+
   return combinedData;
 }
 
 function visualizeCombinedData(
   combinedData,
-  selectedLinkStatuses,
+  selectedFiberLinkStatuses,
   selectedTenants
 ) {
   clearDisplayedPolylines();
-  if (!selectedLinkStatuses.length || !selectedTenants.length) return;
+  if (!selectedFiberLinkStatuses.length || !selectedTenants.length) return;
   for (const id in combinedData) {
     const connection = combinedData[id];
     const { terminations } = connection;
     if (
       terminations.length > 1 &&
       connection.status &&
-      selectedLinkStatuses.includes(connection.status)
+      selectedFiberLinkStatuses.includes(connection.status)
     ) {
       drawPolyline(terminations, connection);
     }
   }
 }
 
-function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
-  if (!selectedTenants.length || !selectedLinkStatuses.length) return;
+function fetchAndDrawPolylinesOnMap(
+  selectedTenants,
+  selectedFiberLinkStatuses,
+  selectedPopsStatuses,
+  selectedGroups
+) {
+  if (!selectedTenants.length || !selectedFiberLinkStatuses.length) return;
   const LINKS_API_CALL = new URL(baseURL + "/api/plugins/geo_map/links/");
   if (selectedTenants.length !== providerSelect.children.length) {
     LINKS_API_CALL.searchParams.set("provider__in", selectedTenants.join(","));
     LINKS_API_CALL.search = LINKS_API_CALL.searchParams.toString();
   }
-  LINKS_API_CALL.searchParams.set("status__in", selectedLinkStatuses.join(","));
+  LINKS_API_CALL.searchParams.set(
+    "status__in",
+    selectedFiberLinkStatuses.join(",")
+  );
+
   LINKS_API_CALL.search = LINKS_API_CALL.searchParams.toString();
 
   fetch(LINKS_API_CALL)
@@ -158,8 +293,13 @@ function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
       const combinedData = combineData(allLinks, allSites);
       visualizeCombinedData(
         combinedData,
-        selectedLinkStatuses,
+        selectedFiberLinkStatuses,
         selectedTenants
+      );
+      addMarkersForFilteredSites(
+        selectedCitySites,
+        selectedPopsStatuses,
+        selectedGroups
       );
     })
     .catch((error) => {
@@ -167,21 +307,151 @@ function fetchAndDrawPolylinesOnMap(selectedTenants, selectedLinkStatuses) {
     });
 }
 
+function fetchSitesByRegion(
+  regionId,
+  selectedFiberLinkStatuses,
+  selectedPopsStatuses,
+  selectedGroups
+) {
+  const CALL = new URL(baseURL + "/api/dcim/sites/");
+  CALL.searchParams.set("region_id", regionId);
+  let arr = [];
+
+  fetch(CALL)
+    .then((response) => response.json())
+    .then((data) => {
+      let d = JSON.parse(JSON.stringify(data));
+      if (!d.results.length) return [];
+      const siteCoordinates = d.results.map((site) => ({
+        lat: site.latitude,
+        lng: site.longitude,
+      }));
+
+      if (siteCoordinates.length >= 2) {
+        const centerCoordinates = calculateCenterBetweenTwoSites(
+          siteCoordinates[0],
+          siteCoordinates[1]
+        );
+        map.setCenter(centerCoordinates);
+        map.setZoom(11);
+      } else if (siteCoordinates.length === 1) {
+        map.setCenter(siteCoordinates[0]);
+        map.setZoom(13);
+      }
+
+      clearDisplayedMarkers();
+
+      allLinks.forEach((link) => {
+        const { termination_a_site, termination_z_site } = link;
+        d.results.forEach((site) => {
+          if (
+            site.id === termination_a_site ||
+            site.id === termination_z_site
+          ) {
+            arr.push(link);
+          }
+        });
+      });
+
+      let regionSites = allSites.filter((site) =>
+        d.results.some((s) => s.id === site.id)
+      );
+
+      return regionSites;
+    })
+    .then((regionSites) => {
+      const PROVIDERS_API_CALL = new URL(
+        baseURL + "/api/plugins/geo_map/providers/"
+      );
+      fetch(PROVIDERS_API_CALL)
+        .then((response) => response.json())
+        .then((data) => {
+          allVendors = JSON.parse(JSON.stringify(data));
+          let povidersByRegion = allVendors.filter(
+            (vendor) =>
+              vendor.regions.length && vendor.regions.includes(Number(regionId))
+          );
+
+          selectedTenants = povidersByRegion.map((tenant) => String(tenant.id));
+
+          Array.from(providerSelect.options).forEach((option) => {
+            option.selected = false;
+          });
+
+          Array.from(providerSelect.options).forEach((option) => {
+            if (selectedTenants.includes(option.value)) {
+              option.selected = true;
+            }
+          });
+
+          providerSelect.loadOptions();
+
+          // Find the corresponding dropdown container and call refresh on it
+          const dropdownDiv = providerSelect.nextSibling;
+          if (dropdownDiv && dropdownDiv.refresh) {
+            dropdownDiv.refresh();
+          }
+          if (!selectedTenants.length) {
+            clearDisplayedPolylines();
+            return;
+          }
+
+          const combo = combineData(arr, regionSites);
+          visualizeCombinedData(
+            combo,
+            selectedFiberLinkStatuses,
+            selectedTenants
+          );
+          addMarkersForFilteredSites(
+            regionSites,
+            selectedPopsStatuses,
+            selectedGroups
+          );
+        });
+    })
+    .catch((error) => {
+      console.error("Error fetching site data:", error);
+      return [];
+    });
+}
+
+function addMarkersForFilteredSites(
+  sites,
+  selectedPopsStatuses,
+  selectedGroups
+) {
+  sites.forEach((site) => {
+    if (
+      (!selectedGroups.length || selectedGroups.includes(site.group)) &&
+      (!selectedPopsStatuses.length ||
+        selectedPopsStatuses.includes(site.status))
+    ) {
+      addMarker({
+        location: { lat: site.latitude, lng: site.longitude },
+        icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
+        content: generateSiteHTML(site),
+      });
+    }
+  });
+}
+
 function fetchDataAndCreateMap(
-  selectedStatuses,
+  selectedPopsStatuses,
   selectedGroups,
   selectedTenants,
-  selectedLinkStatuses
+  selectedFiberLinkStatuses
 ) {
   const currentZoom = map ? map.getZoom() : 6;
   const currentCenter = map ? map.getCenter() : null;
+  storedMapCenter = currentCenter;
+  storedZoomLevel = currentZoom;
 
   const API_CALL = new URL(baseURL + "/api/plugins/geo_map/sites/");
-  if (selectedStatuses.length) {
-    API_CALL.searchParams.set("status__in", selectedStatuses.join(","));
+  if (selectedPopsStatuses.length) {
+    API_CALL.searchParams.set("status__in", selectedPopsStatuses.join(","));
     API_CALL.search = API_CALL.searchParams.toString();
   }
-  if (selectedGroups.length && selectedStatuses.length) {
+  if (selectedGroups.length && selectedPopsStatuses.length) {
     API_CALL.searchParams.set("?group__in", selectedGroups.join(","));
     API_CALL.search = API_CALL.searchParams.toString();
   }
@@ -191,58 +461,27 @@ function fetchDataAndCreateMap(
     .then((data) => {
       allSites = JSON.parse(JSON.stringify(data));
       const centerCoordinates = calculateCenter(data);
-      const mapOptions = {
+      if (!currentCenter) storedMapCenter = centerCoordinates;
+
+      map = new google.maps.Map(document.getElementById("map"), {
         center: centerCoordinates,
         zoom: currentZoom,
         mapId: "Netbox_MAP_ID",
-      };
-      map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      });
+
       if (currentCenter) {
         map.setCenter(currentCenter);
       }
 
-      if (selectedTenants && selectedLinkStatuses) {
+      if (selectedTenants && selectedFiberLinkStatuses) {
         const combinedData = combineData(allLinks, allSites);
         visualizeCombinedData(
           combinedData,
-          selectedLinkStatuses,
+          selectedFiberLinkStatuses,
           selectedTenants
         );
       }
-      if (selectedStatuses.length && selectedGroups.length) {
-        data.forEach((site) => {
-          if (
-            selectedGroups.includes(site.group) &&
-            selectedStatuses.includes(site.status)
-          ) {
-            addMarker({
-              location: { lat: site.latitude, lng: site.longitude },
-              icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
-              content: generateSiteHTML(site),
-            });
-          }
-        });
-      } else if (selectedStatuses.length) {
-        data.forEach((site) => {
-          if (selectedStatuses.includes(site.status)) {
-            addMarker({
-              location: { lat: site.latitude, lng: site.longitude },
-              icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
-              content: generateSiteHTML(site),
-            });
-          }
-        });
-      } else if (selectedGroups.length) {
-        data.forEach((site) => {
-          if (selectedGroups.includes(site.group)) {
-            addMarker({
-              location: { lat: site.latitude, lng: site.longitude },
-              icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
-              content: generateSiteHTML(site),
-            });
-          }
-        });
-      }
+      addMarkersForFilteredSites(data, selectedPopsStatuses, selectedGroups);
     })
     .catch((error) => {
       console.error("Error fetching site data:", error);
@@ -270,44 +509,33 @@ async function addMarker(data) {
     gmpClickable: true,
   });
 
+  displayedMarkers.push(marker);
+
   if (data.content) {
     const infoWindowContent = document.createElement("div");
     infoWindowContent.style.paddingBottom = "10px";
     infoWindowContent.style.color = "black";
     infoWindowContent.style.paddingRight = "20px";
     infoWindowContent.innerHTML = data.content;
+
     const infoWindow = new google.maps.InfoWindow({
       content: infoWindowContent,
     });
+
     marker.addListener("click", () => {
-      infoWindow.open({
-        anchor: marker,
-        map: map,
-        shouldFocus: false,
-      });
+      infoWindow.open({ anchor: marker, map: map, shouldFocus: false });
     });
+
     marker.content.addEventListener("click", () => {
-      infoWindow.open({
-        anchor: marker,
-        map: map,
-        shouldFocus: false,
-      });
+      infoWindow.open({ anchor: marker, map: map, shouldFocus: false });
     });
 
     marker.addListener("mouseover", () => {
-      infoWindow.open({
-        anchor: marker,
-        map: map,
-        shouldFocus: false,
-      });
+      infoWindow.open({ anchor: marker, map: map, shouldFocus: false });
     });
 
     marker.content.addEventListener("mouseover", () => {
-      infoWindow.open({
-        anchor: marker,
-        map: map,
-        shouldFocus: false,
-      });
+      infoWindow.open({ anchor: marker, map: map, shouldFocus: false });
     });
 
     marker.content.addEventListener("mouseout", () => {
@@ -316,173 +544,6 @@ async function addMarker(data) {
       }, 2000);
     });
   }
-}
-
-function generateSiteHTML(site) {
-  return (
-    "<a target='_blank' style='color:black;' href=" +
-    site.url +
-    ">" +
-    site.name +
-    "</a>"
-  );
-}
-
-function drawPolyline(terminations, connection) {
-  const lineSymbolPath = {
-    active: [
-      {
-        //solid line
-        icon: {
-          path: "M 0,1 0,-1",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "1px",
-      },
-    ],
-    planned: [
-      {
-        //dashed line
-        icon: {
-          path: "M 0,-2 0,1",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "15px",
-      },
-    ],
-    offline: [
-      {
-        //dotted line
-        icon: {
-          path: "M 0,3 0,2",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "10px",
-      },
-    ],
-    provisioning: [
-      {
-        //longdash
-        icon: {
-          path: "M 0,-5 0,5",
-          strokeOpacity: 1,
-          scale: 1,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "30px",
-      },
-    ],
-    decommissioned: [
-      {
-        //twodash
-        icon: {
-          path: "M 0,3 0,2",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "15px",
-      },
-      {
-        icon: {
-          path: "M 0,-2 0,1",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "15px",
-      },
-    ],
-    deprovisioning: [
-      {
-        //dotdash
-        icon: {
-          path: "M 0,3 0,2",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "10px",
-      },
-      {
-        icon: {
-          path: "M 0,-2 0,1",
-          strokeOpacity: 1,
-          scale: 2,
-          strokeWeight: 3,
-          strokeColor: connection.color,
-        },
-        offset: "0",
-        repeat: "20px",
-      },
-    ],
-  };
-  const paths = terminations.map((t) => {
-    if (t.latitude === 0 || t.longitude === 0) return null;
-    return { lat: t.latitude, lng: t.longitude };
-  });
-  if (connection.status && !paths.includes(null)) {
-    const polyline = new google.maps.Polyline({
-      path: paths,
-      geodesic: true,
-      strokeOpacity: 0,
-      icons: [...lineSymbolPath[connection.status]],
-    });
-    polyline.setMap(map);
-    displayedPolylines.push(polyline);
-  }
-}
-
-function clearDisplayedPolylines() {
-  for (const polyline of displayedPolylines) {
-    polyline.setMap(null);
-  }
-  displayedPolylines.length = 0;
-}
-
-function calculateCenter(data) {
-  const totalSites = data.length;
-  const sumLat = data.reduce((sum, site) => sum + site.latitude, 0);
-  const sumLng = data.reduce((sum, site) => sum + site.longitude, 0);
-  const averageLat = sumLat / totalSites;
-  const averageLng = sumLng / totalSites;
-
-  if (isNaN(averageLat) || isNaN(averageLng)) {
-    return { lat: 23.5, lng: 78.6677428 };
-  }
-  return { lat: averageLat, lng: averageLng };
-}
-
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      timeout = null;
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
 }
 
 window.initMap = initMap;

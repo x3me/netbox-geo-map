@@ -1,4 +1,5 @@
 from django.urls import path
+from geo_map.api.views import ProviderViewSet
 
 from . import views
 
