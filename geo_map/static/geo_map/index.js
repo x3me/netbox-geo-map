@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((response) => response.json())
       .then((providers) => {
         providerSelect.innerHTML = "";
-        providers.sort((a, b) => a.name.localeCompare(b.name)).forEach((provider) => {
+        providers.forEach((provider) => {
           const option = document.createElement("option");
           option.value = provider.id;
           option.text = provider.name;
