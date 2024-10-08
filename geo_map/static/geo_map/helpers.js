@@ -172,9 +172,28 @@ function debounce(func, wait) {
   };
 }
 
-function calculateCenterBetweenTwoSites(site1, site2) {
-  const centerLat = (site1.lat + site2.lat) / 2;
-  const centerLng = (site1.lng + site2.lng) / 2;
+function calculateCenterBetweenTwoSites(sites) {
+  const validSites = [];
+  for (const site of sites) {
+    if (site.lat !== null && site.lng !== null) {
+      validSites.push(site);
+    }
+
+    if (validSites.length === 2) {
+      break;
+    }
+  }
+
+  if (validSites.length === 0) {
+    return null;
+  }
+
+  if (validSites.length === 1) {
+    return { lat: validSites[0].lat, lng: validSites[0].lng };
+  }
+
+  const centerLat = (validSites[0].lat + validSites[1].lat) / 2;
+  const centerLng = (validSites[0].lng + validSites[1].lng) / 2;
 
   return { lat: centerLat, lng: centerLng };
 }
