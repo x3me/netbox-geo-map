@@ -317,22 +317,15 @@ function fetchSitesByRegion(
         lng: site.longitude,
       }));
 
-      if (siteCoordinates.length >= 2) {
-        const centerCoordinates =
-          calculateCenterBetweenTwoSites(siteCoordinates);
-        map.setCenter(centerCoordinates);
+      const coordinates = calculateCenterBetweenTwoSites(siteCoordinates);
+      if(coordinates) {
+        map.setCenter(coordinates);
         map.setZoom(11);
-      } else if (siteCoordinates.length === 1) {
-        const { lat, lng } = siteCoordinates[0];
-        if (lat !== null && lng !== null) {
-          map.setCenter(siteCoordinates[0]);
-          map.setZoom(13);
-        } else {
-          map.setCenter(storedMapCenter);
-          map.setZoom(storedZoomLevel);
-        }
+      } else {
+        map.setCenter(storedMapCenter);
+        map.setZoom(storedZoomLevel);
       }
-
+      
       clearDisplayedMarkers();
 
       allLinks.forEach((link) => {
