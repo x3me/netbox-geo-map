@@ -173,17 +173,15 @@ function debounce(func, wait) {
 }
 
 function calculateCenterBetweenTwoSites(sites) {
-  const validSites = [];
-  for (const site of sites) {
-    if (site.lat && site.lng) {
-      validSites.push(site);
-    }
+  const validSites = sites.filter(site => site.lat && site.lng);
 
-    if (validSites.length === 2) {
-      break;
+  validSites.sort((a, b) => {
+    if (a.lat === b.lat) {
+      return a.lng - b.lng;
     }
-  }
-
+    return a.lat - b.lat;
+  });
+  console.log('validSites', validSites)
   if (validSites.length === 0) {
     return null;
   }
@@ -192,8 +190,13 @@ function calculateCenterBetweenTwoSites(sites) {
     return { lat: validSites[0].lat, lng: validSites[0].lng };
   }
 
-  const centerLat = (validSites[0].lat + validSites[1].lat) / validSites.length;
-  const centerLng = (validSites[0].lng + validSites[1].lng) / validSites.length;
+  const firstSite = validSites[0];
+  const secondSite = validSites[1];
+  console.log('firstSite', firstSite, 'secondSite', secondSite)
+  const centerLat = (firstSite.lat + secondSite.lat) / 2;
+  const centerLng = (firstSite.lng + secondSite.lng) / 2;
 
   return { lat: centerLat, lng: centerLng };
 }
+
+

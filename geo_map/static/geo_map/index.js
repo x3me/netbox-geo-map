@@ -332,7 +332,7 @@ function fetchSitesByRegion(
       const coordinates = calculateCenterBetweenTwoSites(siteCoordinates);
       if (coordinates) {
         map.setCenter(coordinates);
-        map.setZoom(11);
+        map.setZoom(10);
       } else {
         map.setCenter(storedMapCenter);
         map.setZoom(storedZoomLevel);
@@ -372,7 +372,6 @@ function fetchSitesByRegion(
           );
 
           selectedTenants = povidersByRegion.map((tenant) => String(tenant.id));
-
           Array.from(providerSelect.options).forEach((option) => {
             option.selected = false;
           });
@@ -390,12 +389,19 @@ function fetchSitesByRegion(
           if (dropdownDiv && dropdownDiv.refresh) {
             dropdownDiv.refresh();
           }
-          if (!selectedTenants.length) {
-            clearDisplayedPolylines();
-            return;
-          }
 
           const combo = combineData(arr, regionSites);
+
+          if (!selectedTenants || !combo || !Object.keys(combo).length || !selectedTenants.length) {
+
+            if (storedMapCenter && storedZoomLevel) {
+              map.setCenter(storedMapCenter);
+              map.setZoom(storedZoomLevel);
+              clearDisplayedPolylines();
+              clearDisplayedMarkers();
+              return;
+            }
+          }
           visualizeCombinedData(
             combo,
             selectedFiberLinkStatuses,
