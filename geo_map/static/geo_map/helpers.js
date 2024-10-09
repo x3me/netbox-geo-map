@@ -181,7 +181,7 @@ function calculateCenterBetweenTwoSites(sites) {
     }
     return a.lat - b.lat;
   });
-  console.log('validSites', validSites)
+
   if (validSites.length === 0) {
     return null;
   }
@@ -192,7 +192,7 @@ function calculateCenterBetweenTwoSites(sites) {
 
   const firstSite = validSites[0];
   const secondSite = validSites[1];
-  console.log('firstSite', firstSite, 'secondSite', secondSite)
+
   const centerLat = (firstSite.lat + secondSite.lat) / 2;
   const centerLng = (firstSite.lng + secondSite.lng) / 2;
 
