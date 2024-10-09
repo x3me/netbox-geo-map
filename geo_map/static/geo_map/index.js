@@ -207,6 +207,15 @@ async function initMap() {
     selectedTenants,
     selectedFiberLinkStatuses
   );
+
+  if (initialLoad) {
+    fetchAndDrawPolylinesOnMap(
+      selectedTenants,
+      ["active"],
+      ["active"],
+      ["access", "core", "distribution", "pit"]
+    );
+  }
 }
 
 function combineData(linksArray, sitesArray) {
@@ -291,6 +300,9 @@ function fetchAndDrawPolylinesOnMap(
         selectedPopsStatuses,
         selectedGroups
       );
+      if (initialLoad) {
+        initialLoad = false;
+      }
     })
     .catch((error) => {
       console.error("Error fetching site data:", error);
@@ -318,14 +330,14 @@ function fetchSitesByRegion(
       }));
 
       const coordinates = calculateCenterBetweenTwoSites(siteCoordinates);
-      if(coordinates) {
+      if (coordinates) {
         map.setCenter(coordinates);
         map.setZoom(11);
       } else {
         map.setCenter(storedMapCenter);
         map.setZoom(storedZoomLevel);
       }
-      
+
       clearDisplayedMarkers();
 
       allLinks.forEach((link) => {
@@ -466,15 +478,6 @@ function fetchDataAndCreateMap(
           combinedData,
           selectedFiberLinkStatuses,
           selectedTenants
-        );
-      }
-      if (initialLoad) {
-        initialLoad = false;
-        fetchAndDrawPolylinesOnMap(
-          selectedTenants,
-          ["active"],
-          ["active"],
-          ["access", "core", "distribution", "pit"]
         );
       }
       addMarkersForFilteredSites(data, selectedPopsStatuses, selectedGroups);

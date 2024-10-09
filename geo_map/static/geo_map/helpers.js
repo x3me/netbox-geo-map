@@ -175,7 +175,7 @@ function debounce(func, wait) {
 function calculateCenterBetweenTwoSites(sites) {
   const validSites = [];
   for (const site of sites) {
-    if (site.lat !== null && site.lng !== null) {
+    if (site.lat && site.lng) {
       validSites.push(site);
     }
 
@@ -192,8 +192,8 @@ function calculateCenterBetweenTwoSites(sites) {
     return { lat: validSites[0].lat, lng: validSites[0].lng };
   }
 
-  const centerLat = (validSites[0].lat + validSites[1].lat) / 2;
-  const centerLng = (validSites[0].lng + validSites[1].lng) / 2;
+  const centerLat = (validSites[0].lat + validSites[1].lat) / validSites.length;
+  const centerLng = (validSites[0].lng + validSites[1].lng) / validSites.length;
 
   return { lat: centerLat, lng: centerLng };
 }
