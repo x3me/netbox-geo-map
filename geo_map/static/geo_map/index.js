@@ -86,11 +86,9 @@ async function fetchAndCreateMapData(
 
   if (selectedPopsStatuses.length) {
     SITES_API_CALL.searchParams.set("status__in", selectedPopsStatuses.join(","));
-    SITES_API_CALL.search = SITES_API_CALL.searchParams.toString();
   }
   if (selectedGroups.length && selectedPopsStatuses.length) {
     SITES_API_CALL.searchParams.set("?group__in", selectedGroups.join(","));
-    SITES_API_CALL.search = SITES_API_CALL.searchParams.toString();
   }
   if (selectedTenants.length) {
     LINKS_API_CALL.searchParams.set("provider__in", selectedTenants.join(","));
