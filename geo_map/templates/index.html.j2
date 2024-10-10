@@ -59,13 +59,15 @@
         </div>
     </div>
 
-    <div id="map" style="height: 400px; width: 100%; position:relative;"></div>
-</div>
-<div id="loader" class="position-absolute top-50 start-50 translate-middle d-block">
+    <div id="map" style="height: 400px; width: 100%; position:relative;">
+    <div id="loader" class="position-absolute top-50 start-50 translate-middle d-block">
     <div class="spinner-border text-primary" role="status" style="width: 5em; height: 5em;">
         <span class="visually-hidden">Loading...</span>
     </div>
+    </div>
 </div>
+</div>
+
 {% endblock content %}
 {% block javascript %}
 <script src="{% static 'geo_map/kml.js' %}"></script>
