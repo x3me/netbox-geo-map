@@ -387,7 +387,7 @@ function fetchSitesByRegion(
         lng: site.longitude,
       }));
 
-      const coordinates = calculateCenterBetweenTwoSites(siteCoordinates);
+      const coordinates = calculateCenterBetweenSites(siteCoordinates);
       if (coordinates) {
         map.setCenter(coordinates);
         map.setZoom(10);

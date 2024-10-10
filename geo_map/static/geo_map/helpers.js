@@ -172,7 +172,7 @@ function debounce(func, wait) {
   };
 }
 
-function calculateCenterBetweenTwoSites(sites) {
+function calculateCenterBetweenSites(sites) {
   const validSites = sites.filter(site => site.lat && site.lng);
 
   validSites.sort((a, b) => {
@@ -190,11 +190,17 @@ function calculateCenterBetweenTwoSites(sites) {
     return { lat: validSites[0].lat, lng: validSites[0].lng };
   }
 
-  const firstSite = validSites[0];
-  const secondSite = validSites[1];
-
-  const centerLat = (firstSite.lat + secondSite.lat) / 2;
-  const centerLng = (firstSite.lng + secondSite.lng) / 2;
+  let centerLat
+  let centerLng
+  if (validSites.length > 10) {
+    centerLat = validSites.reduce((acc, site) => acc + site.lat, 0) / validSites.length;
+    centerLng = validSites.reduce((acc, site) => acc + site.lng, 0) / validSites.length;
+  } else {
+    const firstSite = validSites[0];
+    const secondSite = validSites[1];
+    centerLat = (firstSite.lat + secondSite.lat) / 2;
+    centerLng = (firstSite.lng + secondSite.lng) / 2;
+  }
 
   return { lat: centerLat, lng: centerLng };
 }
