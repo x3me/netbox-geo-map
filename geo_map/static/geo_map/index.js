@@ -94,7 +94,7 @@ async function fetchAndCreateMapData(
     LINKS_API_CALL.searchParams.set("provider__in", selectedTenants.join(","));
   }
   if (selectedFiberLinkStatuses.length) {
-    LINKS_API_CALL.searchParams.set("?status__in", selectedFiberLinkStatuses.join(","));
+    LINKS_API_CALL.searchParams.set("status__in", selectedFiberLinkStatuses.join(","));
   }
 
   try {
@@ -106,8 +106,8 @@ async function fetchAndCreateMapData(
     const sitesData = await sitesResponse.json();
     const linksData = await linksResponse.json();
 
-    allSites = JSON.parse(JSON.stringify(sitesData));
-    allLinks = JSON.parse(JSON.stringify(linksData));
+    allSites = sitesData
+    allLinks = linksData
 
     const centerCoordinates = calculateCenter(sitesData);
     if (!currentCenter) storedMapCenter = centerCoordinates;
