@@ -144,7 +144,9 @@ async function fetchAndCreateMapData(
 async function initMap() {
   let selectedFiberLinkStatuses = ["active"];
   let selectedPopsStatuses = ["active"];
-  let selectedGroups = ["access", "core", "distribution", "pit"];
+  let selectedGroups = Array.from(groupSelect.options).map((option) =>
+    option.value
+  );
 
   citySelect.addEventListener(
     "change",
@@ -167,7 +169,10 @@ async function initMap() {
 
       selectedFiberLinkStatuses = ["active"];
       selectedPopsStatuses = ["active"];
-      selectedGroups = ["access", "core", "distribution", "pit"];
+
+      selectedGroups = Array.from(groupSelect.options).map((option) =>
+        option.value
+      );
 
       resetSelections([
         { element: fiberLinkSelect, value: "active" },
@@ -471,11 +476,15 @@ function addMarkersForFilteredSites(
   selectedGroups
 ) {
   sites.forEach((site) => {
+    let localSelectedGroups = Array.from(groupSelect.selectedOptions).map(
+      (option) => option.text.toLowerCase()
+    );
     if (
-      (!selectedGroups.length || selectedGroups.includes(site.group)) &&
+      (!selectedGroups.length || localSelectedGroups.includes(site.group)) &&
       (!selectedPopsStatuses.length ||
         selectedPopsStatuses.includes(site.status))
     ) {
+
       addMarker({
         location: { lat: site.latitude, lng: site.longitude },
         icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,

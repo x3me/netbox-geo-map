@@ -44,7 +44,7 @@
             <select name="group-select" id="group-select" multiple multiselect-search="true"
                 multiselect-select-all="true" multiselect-max-items="3" placeholder="POP Groups">
                 {% for group in site_groups %}
-                <option value="{{group.label}}"  selected class="checked" >
+                <option value="{{group.value}}"  selected class="checked" >
                     {{group.label}}
                 </option>
                 {% endfor %}
