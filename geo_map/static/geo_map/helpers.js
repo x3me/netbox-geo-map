@@ -172,17 +172,15 @@ function debounce(func, wait) {
   };
 }
 
-function calculateCenterBetweenTwoSites(sites) {
-  const validSites = [];
-  for (const site of sites) {
-    if (site.lat !== null && site.lng !== null) {
-      validSites.push(site);
-    }
+function calculateCenterBetweenSites(sites) {
+  const validSites = sites.filter(site => site.lat && site.lng);
 
-    if (validSites.length === 2) {
-      break;
+  validSites.sort((a, b) => {
+    if (a.lat === b.lat) {
+      return a.lng - b.lng;
     }
-  }
+    return a.lat - b.lat;
+  });
 
   if (validSites.length === 0) {
     return null;
@@ -192,8 +190,19 @@ function calculateCenterBetweenTwoSites(sites) {
     return { lat: validSites[0].lat, lng: validSites[0].lng };
   }
 
-  const centerLat = (validSites[0].lat + validSites[1].lat) / 2;
-  const centerLng = (validSites[0].lng + validSites[1].lng) / 2;
+  let centerLat
+  let centerLng
+  if (validSites.length > 10) {
+    centerLat = validSites.reduce((acc, site) => acc + site.lat, 0) / validSites.length;
+    centerLng = validSites.reduce((acc, site) => acc + site.lng, 0) / validSites.length;
+  } else {
+    const firstSite = validSites[0];
+    const secondSite = validSites[1];
+    centerLat = (firstSite.lat + secondSite.lat) / 2;
+    centerLng = (firstSite.lng + secondSite.lng) / 2;
+  }
 
   return { lat: centerLat, lng: centerLng };
 }
+
+
