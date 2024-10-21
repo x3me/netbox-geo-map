@@ -20,7 +20,6 @@ RUN /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py collectstatic --no-
 ## Edit the docker-compose.test.override.yml file in: ~/netbox-docker/
 
 ```yml
-version: '3.4'
 services:
     netbox:
         ports:
