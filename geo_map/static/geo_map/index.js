@@ -85,16 +85,16 @@ async function fetchAndCreateMapData(
   const LINKS_API_CALL = new URL(baseURL + "/api/plugins/geo_map/links/");
 
   if (selectedPopsStatuses.length) {
-    SITES_API_CALL.searchParams.set("status_in", selectedPopsStatuses.join(","));
+    SITES_API_CALL.searchParams.set("status__in", selectedPopsStatuses.join(","));
   }
   if (selectedGroups.length && selectedPopsStatuses.length) {
-    SITES_API_CALL.searchParams.set("group_in", selectedGroups.join(","));
+    SITES_API_CALL.searchParams.set("group__in", selectedGroups.join(","));
   }
   if (selectedTenants.length) {
-    LINKS_API_CALL.searchParams.set("account_in", selectedTenants.join(","));
+    LINKS_API_CALL.searchParams.set("provider__in", selectedTenants.join(","));
   }
   if (selectedFiberLinkStatuses.length) {
-    LINKS_API_CALL.searchParams.set("status_in", selectedFiberLinkStatuses.join(","));
+    LINKS_API_CALL.searchParams.set("status__in", selectedFiberLinkStatuses.join(","));
   }
 
   try {
@@ -276,7 +276,6 @@ async function initMap() {
       selectedTenants = Array.from(providerSelect.selectedOptions).map(
         (option) => option.value
       );
-
       if (!selectedTenants.length) {
         clearDisplayedPolylines();
         return;
