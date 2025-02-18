@@ -12,7 +12,6 @@ from django.core.cache import cache
 from rest_framework.views import APIView
 from django.db.models import Count
 from rest_framework.viewsets import ModelViewSet
-from circuits.models import Provider
 from .serializers import ProviderSerializer
 
 
@@ -70,6 +69,7 @@ class LinkViewSet(PermissionRequiredMixin, GenericViewSet, ListModelMixin):
         qs = qs.exclude(provider__isnull=True)
 
         return qs
+
 
 
 class ProviderViewSet(ModelViewSet):

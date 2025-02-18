@@ -1,6 +1,6 @@
-from dcim.models import CableTermination, Site
-from netbox.api.serializers import NetBoxModelSerializer
 from rest_framework import serializers
+from netbox.api.serializers import NetBoxModelSerializer
+from dcim.models import CableTermination, Site
 from circuits.models import Circuit, Provider
 
 
@@ -67,6 +67,7 @@ class ProviderSerializer(NetBoxModelSerializer):
                     termination.site.region_id
                     for circuit in obj.circuits.all()
                     for termination in circuit.terminations.all()
+                    if termination.site
                 ]
             )
         )
