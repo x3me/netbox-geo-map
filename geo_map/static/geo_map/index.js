@@ -290,7 +290,46 @@ async function initMap() {
   );
 
   exportButton.addEventListener("click", () => {
-    exportKML(allSites);
+    let filteredSites = [];
+    let filteredLinks = [];
+
+    if (selectedCityId && selectedCityIdSites.length > 0) {
+      filteredSites = allSites.filter(site =>
+        selectedCityIdSites.some(citysite => citysite.id === site.id)
+      );
+
+      filteredLinks = allLinks.filter(link => {
+        const hasTerminationA = filteredSites.some(site => site.id === link.termination_a_site);
+        const hasTerminationZ = filteredSites.some(site => site.id === link.termination_z_site);
+        return hasTerminationA && hasTerminationZ;
+      });
+    } else {
+      const selectedPopsStatuses = Array.from(popsStatusSelect.selectedOptions).map(
+        option => option.value
+      );
+      const selectedGroups = Array.from(groupSelect.selectedOptions).map(
+        option => option.text.toLowerCase()
+      );
+
+      filteredSites = allSites.filter(site => {
+        const statusMatch = !selectedPopsStatuses.length || selectedPopsStatuses.includes(site.status);
+        const groupMatch = !selectedGroups.length || selectedGroups.includes(site.group);
+        return statusMatch && groupMatch;
+      });
+
+      const selectedFiberLinkStatuses = Array.from(fiberLinkSelect.selectedOptions).map(
+        option => option.value
+      );
+
+      filteredLinks = allLinks.filter(link => {
+        const statusMatch = !selectedFiberLinkStatuses.length || selectedFiberLinkStatuses.includes(link.status);
+        const hasTerminationA = filteredSites.some(site => site.id === link.termination_a_site);
+        const hasTerminationZ = filteredSites.some(site => site.id === link.termination_z_site);
+        return statusMatch && hasTerminationA && hasTerminationZ;
+      });
+    }
+
+    exportKML(filteredSites, filteredLinks);
   });
 
   fetchAndCreateMapData(
@@ -484,7 +523,6 @@ function addMarkersForFilteredSites(
       (!selectedPopsStatuses.length ||
         selectedPopsStatuses.includes(site.status))
     ) {
-
       addMarker({
         location: { lat: site.latitude, lng: site.longitude },
         icon: `/static/geo_map/assets/icons/${site.group}_${site.status}.svg`,
