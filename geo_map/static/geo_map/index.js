@@ -63,7 +63,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         selectedTenants = providers.map((provider) => provider.id);
         allVendors = JSON.parse(JSON.stringify(providers));
-        initMap();
       })
       .catch((error) => console.error("Error fetching providers:", error));
   }
@@ -289,48 +288,51 @@ async function initMap() {
     }, 1000)
   );
 
-  exportButton.addEventListener("click", () => {
-    let filteredSites = [];
-    let filteredLinks = [];
+  if (!exportButton.hasAttribute('data-listener-attached')) {
+    exportButton.setAttribute('data-listener-attached', 'true');
+    exportButton.addEventListener("click", () => {
+      let filteredSites = [];
+      let filteredLinks = [];
 
-    if (selectedCityId && selectedCityIdSites.length > 0) {
-      filteredSites = allSites.filter(site =>
-        selectedCityIdSites.some(citysite => citysite.id === site.id)
-      );
+      if (selectedCityId && selectedCityIdSites.length > 0) {
+        filteredSites = allSites.filter(site =>
+          selectedCityIdSites.some(citysite => citysite.id === site.id)
+        );
 
-      filteredLinks = allLinks.filter(link => {
-        const hasTerminationA = filteredSites.some(site => site.id === link.termination_a_site);
-        const hasTerminationZ = filteredSites.some(site => site.id === link.termination_z_site);
-        return hasTerminationA && hasTerminationZ;
-      });
-    } else {
-      const selectedPopsStatuses = Array.from(popsStatusSelect.selectedOptions).map(
-        option => option.value
-      );
-      const selectedGroups = Array.from(groupSelect.selectedOptions).map(
-        option => option.text.toLowerCase()
-      );
+        filteredLinks = allLinks.filter(link => {
+          const hasTerminationA = filteredSites.some(site => site.id === link.termination_a_site);
+          const hasTerminationZ = filteredSites.some(site => site.id === link.termination_z_site);
+          return hasTerminationA && hasTerminationZ;
+        });
+      } else {
+        const selectedPopsStatuses = Array.from(popsStatusSelect.selectedOptions).map(
+          option => option.value
+        );
+        const selectedGroups = Array.from(groupSelect.selectedOptions).map(
+          option => option.text.toLowerCase()
+        );
 
-      filteredSites = allSites.filter(site => {
-        const statusMatch = !selectedPopsStatuses.length || selectedPopsStatuses.includes(site.status);
-        const groupMatch = !selectedGroups.length || selectedGroups.includes(site.group);
-        return statusMatch && groupMatch;
-      });
+        filteredSites = allSites.filter(site => {
+          const statusMatch = !selectedPopsStatuses.length || selectedPopsStatuses.includes(site.status);
+          const groupMatch = !selectedGroups.length || selectedGroups.includes(site.group);
+          return statusMatch && groupMatch;
+        });
 
-      const selectedFiberLinkStatuses = Array.from(fiberLinkSelect.selectedOptions).map(
-        option => option.value
-      );
+        const selectedFiberLinkStatuses = Array.from(fiberLinkSelect.selectedOptions).map(
+          option => option.value
+        );
 
-      filteredLinks = allLinks.filter(link => {
-        const statusMatch = !selectedFiberLinkStatuses.length || selectedFiberLinkStatuses.includes(link.status);
-        const hasTerminationA = filteredSites.some(site => site.id === link.termination_a_site);
-        const hasTerminationZ = filteredSites.some(site => site.id === link.termination_z_site);
-        return statusMatch && hasTerminationA && hasTerminationZ;
-      });
-    }
+        filteredLinks = allLinks.filter(link => {
+          const statusMatch = !selectedFiberLinkStatuses.length || selectedFiberLinkStatuses.includes(link.status);
+          const hasTerminationA = filteredSites.some(site => site.id === link.termination_a_site);
+          const hasTerminationZ = filteredSites.some(site => site.id === link.termination_z_site);
+          return statusMatch && hasTerminationA && hasTerminationZ;
+        });
+      }
 
-    exportKML(filteredSites, filteredLinks);
-  });
+      exportKML(filteredSites, filteredLinks);
+    });
+  }
 
   fetchAndCreateMapData(
     selectedPopsStatuses,
